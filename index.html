@@ -4,12 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тёмные Истории</title>
+
+  <!-- Шрифты с поддержкой кириллицы -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond&family=Marcellus+SC&display=swap" rel="stylesheet">
+
   <style>
     body {
       margin: 0;
-      font-family: 'Georgia', serif;
+      font-family: 'Cormorant Garamond', serif;
       background-color: #0a0a0a;
       color: #c0d8ff;
+      overflow-x: hidden;
     }
     header {
       background: url('https://i.imgur.com/qszEYp6.jpeg') no-repeat center center;
@@ -28,6 +33,10 @@
     header h1, header p.subtitle {
       position: relative;
       z-index: 2;
+    }
+    h1, h2, nav a {
+      font-family: 'Marcellus SC', serif;
+      text-transform: uppercase;
     }
     h1 {
       font-size: 3rem;
@@ -70,9 +79,26 @@
       color: #64748b;
       font-size: 0.9rem;
     }
+
+    /* === ТУМАН === */
+    .fog {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url('https://i.imgur.com/dFdOIQp.png') repeat;
+      pointer-events: none;
+      opacity: 0.15;
+      z-index: 10;
+      animation: fogMove 120s linear infinite;
+    }
+
+    @keyframes fogMove {
+      0% { background-position: 0 0; }
+      100% { background-position: 1000px 1000px; }
+    }
   </style>
 </head>
 <body>
+  <div class="fog"></div>
   <header>
     <h1>ТЁМНЫЕ ИСТОРИИ</h1>
     <p class="subtitle">Истории, забытые светом</p>
