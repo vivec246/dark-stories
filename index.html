@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Тёмные Истории</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Georgia', serif;
+      background-color: #0a0a0a;
+      color: #c0d8ff;
+    }
+    header {
+      background: url('https://i.imgur.com/qszEYp6.jpeg') no-repeat center center;
+      background-size: cover;
+      text-align: center;
+      padding: 120px 20px 100px;
+      position: relative;
+    }
+    header::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1;
+    }
+    header h1, header p.subtitle {
+      position: relative;
+      z-index: 2;
+    }
+    h1 {
+      font-size: 3rem;
+      color: #60a5fa;
+      margin: 0;
+    }
+    p.subtitle {
+      font-size: 1.2rem;
+      color: #a5b4fc;
+      margin-top: 10px;
+    }
+    nav {
+      text-align: center;
+      margin: 30px 0;
+    }
+    nav a {
+      color: #93c5fd;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+    }
+    nav a:hover {
+      color: #3b82f6;
+    }
+    section {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .story-placeholder {
+      border: 1px solid #1e3a8a;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      background-color: #111827;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ТЁМНЫЕ ИСТОРИИ</h1>
+    <p class="subtitle">Истории, забытые светом</p>
+  </header>
+  <nav>
+    <a href="#stories">Рассказы</a>
+    <a href="#about">Обо мне</a>
+    <a href="#contacts">Контакты</a>
+  </nav>
+  <section id="stories">
+    <h2>📚 Рассказы</h2>
+    <div class="story-placeholder">
+      <h3>Название рассказа</h3>
+      <p>Описание... скоро появится.</p>
+    </div>
+    <div class="story-placeholder">
+      <h3>Ещё одна история</h3>
+      <p>Закрыта древними чарами...</p>
+    </div>
+  </section>
+  <section id="about">
+    <h2>✍️ Обо мне</h2>
+    <p>
+      Автор: Тот, кто пишет в темноте.<br />
+      Иногда — ночью. Иногда — на границе миров.<br />
+      Рассказы — способ сохранить то, что было забыто.
+    </p>
+  </section>
+  <section id="contacts">
+    <h2>📎 Контакты</h2>
+    <p>Пока спрятаны во тьме...</p>
+  </section>
+  <footer>
+    © 2025 Тёмные Истории. Все права забыты во мраке.
+  </footer>
+</body>
+</html>
