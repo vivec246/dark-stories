@@ -1,0 +1,27 @@
+{
+  "name": "Dark Stories",
+  "short_name": "DarkStories",
+  "description": "Тёмные истории от Дмитрия Ланцева",
+  "start_url": "https://vivec246.github.io/dark-stories/",
+  "display": "standalone",
+  "theme_color": "#05070a",
+  "background_color": "#05070a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
