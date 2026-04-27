@@ -43,12 +43,25 @@
             line-height: 1.6;
         }
         
-        /* Убираем подсветку при касании на мобильных */
-        button, .btn-read, .tab-link, .control-btn, .contact-card,
-        .search-btn, .clear-search, .card-content, .support-icon,
-        .support-tab-btn, .footer-links span, a, div[onclick] {
-            -webkit-tap-highlight-color: transparent;
-            tap-highlight-color: transparent;
+        /* Дополнительный черный фон для мобильных приложений (WebView, соцсети) */
+        @media (max-width: 768px) {
+            body {
+                background: #000000 !important;
+            }
+            .reader-overlay {
+                background: #000000 !important;
+            }
+            .card {
+                background: rgba(0, 0, 0, 0.6) !important;
+                backdrop-filter: blur(2px);
+            }
+            .support-tab-section, .contact-card, .modal-box, .support-modal-content {
+                background: rgba(0, 0, 0, 0.85) !important;
+                backdrop-filter: blur(12px);
+            }
+            .reader-content.night-mode {
+                background: #000000 !important;
+            }
         }
         
         .blob {
@@ -112,11 +125,12 @@
             margin-bottom: 20px;
             line-height: 1.2;
             animation: titleZoom 1s forwards, colorFlow 12s ease-in-out infinite;
-            background: linear-gradient(135deg, #521111, #88aadd, #ffffff);
+            background: linear-gradient(135deg, #ffffff, #667894, #ffffff);
             background-size: 200% auto;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(213, 218, 223, 0.5);
         }
         @keyframes titleZoom { 0% { opacity: 0; transform: scale(0.85); } 100% { opacity: 1; transform: scale(1); } }
         @keyframes colorFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
@@ -264,138 +278,187 @@
             max-width: 1400px;
             margin: 0 auto;
         }
-        /* Телефоны вертикальные — 1 карточка */
         @media (max-width: 768px) and (orientation: portrait) {
             .content-grid { grid-template-columns: 1fr; gap: 20px; }
         }
-        /* Телефоны горизонтальные — 2 карточки */
         @media (max-width: 900px) and (orientation: landscape) {
             .content-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
             .card-content { padding: 12px; }
             .card h3 { font-size: 0.9em; }
-            .card-genre { font-size: 8px; }
+            .card-genre { font-size: 8px !important; }
             .btn-read { font-size: 9px; padding: 4px 12px; }
         }
-        /* Планшеты вертикальные — 2 карточки */
         @media (min-width: 768px) and (max-width: 900px) and (orientation: portrait) {
             .content-grid { grid-template-columns: repeat(2, 1fr); }
         }
-        /* Планшеты горизонтальные — 3 карточки */
         @media (min-width: 900px) and (max-width: 1024px) {
             .content-grid { grid-template-columns: repeat(3, 1fr); }
         }
-        /* Ноутбуки и ПК — 4 карточки */
         @media (min-width: 1024px) and (max-width: 1920px) {
             .content-grid { grid-template-columns: repeat(4, 1fr); }
         }
-        /* Широкоформатные — 5 карточек */
         @media (min-width: 1920px) {
             .content-grid { grid-template-columns: repeat(5, 1fr); }
         }
         
-        .card {
-            position: relative;
-            border-radius: 20px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(136, 170, 221, 0.2);
-            background: rgba(10, 14, 20, 0.4);
-            backdrop-filter: blur(4px);
-            display: flex;
-            flex-direction: column;
-        }
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(0, 0, 0, 0.15) 100%);
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
-            z-index: 1;
-            pointer-events: none;
-            border-radius: 20px;
-        }
-        /* Подсветка на ПК — при наведении */
-        .card:hover {
-            border-color: var(--accent);
-            transform: translateY(-4px);
-            box-shadow: 0 15px 35px rgba(136, 170, 221, 0.2);
-            background: rgba(10, 14, 20, 0.6);
-            backdrop-filter: blur(8px);
-        }
-        .card:hover .card-image {
-            filter: grayscale(0%);
-            transform: scale(1.05);
-        }
-        .card.missing { opacity: 0.4; filter: grayscale(0.3); pointer-events: none; }
-        
-        .card-image-wrapper {
-            position: relative;
-            width: 100%;
-            padding-bottom: 133.33%;
-            overflow: hidden;
-            cursor: pointer;
-        }
-        .card-image {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            filter: grayscale(100%);
-            transition: filter 0.3s, transform 0.3s;
-        }
-        .card-content {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 20px;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            z-index: 2;
-            cursor: pointer;
-        }
-        .card-genre {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 10px;
-            letter-spacing: 2px;
-            color: var(--accent);
-            text-transform: uppercase;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.3s;
-        }
-        .card:hover .card-genre { opacity: 1; transform: translateY(0); }
-        .card h3 { 
-            font-family: 'Montserrat', sans-serif; 
-            font-size: 1.1em; 
-            margin: 5px 0; 
-            color: #fff; 
-            transition: color 0.3s;
-            cursor: pointer;
-        }
-        .card:hover h3 { color: var(--accent); }
-        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
-        .age-rating { font-size: 11px; opacity: 0.5; transition: all 0.3s; display: inline-block; }
-        .card:hover .age-rating { opacity: 1; text-shadow: 0 0 5px var(--accent); transform: scale(1.1); }
-        .btn-read {
-            background: transparent;
-            border: none;
-            color: var(--accent);
-            font-size: 11px;
-            letter-spacing: 2px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            opacity: 0.7;
-            transition: 0.3s;
-        }
-        .card:hover .btn-read { opacity: 1; gap: 8px; }
+        /* ========== КАРТОЧКИ ========== */
+.card {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(136, 170, 221, 0.2);
+    background: rgba(10, 14, 20, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+}
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(0, 0, 0, 0.15) 100%);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+    z-index: 1;
+    pointer-events: none;
+    border-radius: 20px;
+}
+.card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(136, 170, 221, 0.15);    background: rgba(10, 14, 20, 0.6);
+    backdrop-filter: blur(8px);
+}
+.card:hover .card-image {
+    filter: grayscale(0%);
+    transform: scale(1.05);
+}
+.card.missing { opacity: 0.4; filter: grayscale(0.3); pointer-events: none; }
+
+/* ========== ОБЛОЖКА ========== */
+.card-image-wrapper {
+    position: relative;
+    width: 100%;
+    padding-bottom: 133.33%;
+    overflow: hidden;
+    cursor: pointer;
+}
+.card-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(100%);
+    transition: filter 0.3s, transform 0.3s;
+}
+
+/* ========== КОНТЕНТ КАРТОЧКИ ========== */
+.card-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 50%, transparent 100%);
+    z-index: 2;
+    cursor: pointer;
+}
+.card-genre {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+}
+.card h3 { 
+    font-family: 'Montserrat', sans-serif; 
+    font-size: 1.1em; 
+    margin: 5px 0; 
+    color: #fff; 
+    transition: color 0.3s;
+    cursor: pointer;
+    font-weight: 900;
+    text-shadow: 0 0 25px rgba(0, 0, 0, 1);
+}
+.card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+.age-rating { 
+    font-size: 11px; 
+    opacity: 0.5; 
+    transition: all 0.3s; 
+    display: inline-block;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+.btn-read {
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    font-size: 11px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    opacity: 0.7;
+    transition: 0.3s;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* Убираем свечение при ховере, оставляем только тень */
+.card:hover .card-genre {
+    opacity: 1;
+    transform: translateY(0);
+    text-shadow: 0 0 25px rgba(0, 0, 0, 1);
+}
+.card:hover h3 {
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(0, 0, 0, 1);
+}
+.card:hover .age-rating {
+    opacity: 1;
+    transform: scale(1.05);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+}
+.card:hover .btn-read {
+    opacity: 1;
+    gap: 8px;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+}
+/* Подсветка снизу при наведении на карточку */
+.card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), #ffffff, var(--accent));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+    z-index: 3;
+    pointer-events: none;
+}
+/* Голубая тень при наведении */
+.card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 15px 35px rgba(136, 170, 221, 0.5);
+    background: rgba(10, 14, 20, 0.6);
+    backdrop-filter: blur(8px);
+}
+
+.card:hover::after {
+    transform: scaleX(1);
+}
         
         /* Анимация карточек на мобильных при прокрутке */
         .card-visible {
@@ -726,7 +789,7 @@
             justify-content: center;
             transition: 0.3s;
         }
-        .control-btn:hover {
+                .control-btn:hover {
             background: var(--accent);
             color: #000;
             border-color: var(--accent);
@@ -766,7 +829,7 @@
             width: 90%;
             position: relative;
         }
-                .bookmark-item { background: rgba(255,255,255,0.05); padding: 10px; margin-bottom: 8px; border-radius: 10px; cursor: pointer; border-left: 3px solid var(--accent); display: flex; justify-content: space-between; align-items: center; }
+        .bookmark-item { background: rgba(255,255,255,0.05); padding: 10px; margin-bottom: 8px; border-radius: 10px; cursor: pointer; border-left: 3px solid var(--accent); display: flex; justify-content: space-between; align-items: center; }
         .delete-bm { color: #ff5555; cursor: pointer; padding: 5px; }
         
         .main-footer {
@@ -815,7 +878,6 @@
         .footer-links span:hover { opacity: 1; color: var(--accent); }
         .footer-links .separator { opacity: 0.3; cursor: default; }
         
-        /* Мобильные стили */
         @media (max-width: 768px) {
             nav.tabs { flex-direction: column; align-items: stretch; }
             .nav-links { justify-content: center; gap: 15px; }
@@ -832,8 +894,6 @@
             .support-tab-section { margin: 30px auto; padding: 30px 15px; }
             .table-of-contents .toc-modal-box { max-width: 320px; padding: 20px; }
             .table-of-contents a { padding: 8px 10px; font-size: 0.8em; }
-            
-            /* Убираем горизонтальную прокрутку на мобильных */
             .reader-overlay { overflow-x: hidden; }
             .reader-content { overflow-x: hidden; max-width: 100%; padding: 20px 15px; }
             .reader-body { overflow-x: hidden; word-wrap: break-word; }
@@ -850,7 +910,6 @@
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
         ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
         
-        /* Защита от копирования в читалке */
         .reader-body {
             user-select: none;
             -webkit-user-select: none;
@@ -959,68 +1018,15 @@
 </nav>
 
 <main style="max-width:1400px; margin:0 auto; padding:0 20px;">
+    
     <!-- РАССКАЗЫ -->
     <section id="stories" class="content-section">
-        <div class="content-grid">
-            <div class="card" data-file="stories/mission_hades/mission_hades.md">
-                <div class="card-image-wrapper" onclick="event.stopPropagation();">
-                    <img class="card-image" src="cap/covers/mission_hades.jpg" alt="МИССИЯ АИД">
-                </div>
-                <div class="card-content" onclick="openReader('stories/mission_hades/mission_hades.md', 'МИССИЯ АИД')">
-                    <div class="card-genre">Научная фантастика / Хоррор</div>
-                    <h3>МИССИЯ АИД</h3>
-                    <div class="card-footer">
-                        <span class="age-rating">18+</span>
-                        <div class="btn-read" onclick="event.stopPropagation(); openReader('stories/mission_hades/mission_hades.md', 'МИССИЯ АИД')">ЧИТАТЬ →</div>
-                    </div>
-                </div>
-            </div>
-            <div class="card" data-file="stories/bear_at_a_crossroads/bear_at_a_crossroads.md">
-                <div class="card-image-wrapper" onclick="event.stopPropagation();">
-                    <img class="card-image" src="cap/covers/bear_at_a_crossroads.jpg" alt="МЕДВЕДЬ НА ПЕРЕПУТЬЕ">
-                </div>
-                <div class="card-content" onclick="openReader('stories/bear_at_a_crossroads/bear_at_a_crossroads.md', 'МЕДВЕДЬ НА ПЕРЕПУТЬЕ')">
-                    <div class="card-genre">Тёмное фэнтези</div>
-                    <h3>МЕДВЕДЬ НА ПЕРЕПУТЬЕ</h3>
-                    <div class="card-footer">
-                        <span class="age-rating">18+</span>
-                        <div class="btn-read" onclick="event.stopPropagation(); openReader('stories/bear_at_a_crossroads/bear_at_a_crossroads.md', 'МЕДВЕДЬ НА ПЕРЕПУТЬЕ')">ЧИТАТЬ →</div>
-                    </div>
-                </div>
-            </div>
-            <div class="card" data-file="stories/the_fox_folk/the_fox_folk.md">
-                <div class="card-image-wrapper" onclick="event.stopPropagation();">
-                    <img class="card-image" src="cap/covers/the_fox_folk.jpg" alt="ЛИСИЙ НАРОД">
-                </div>
-                <div class="card-content" onclick="openReader('stories/the_fox_folk/the_fox_folk.md', 'ЛИСИЙ НАРОД')">
-                    <div class="card-genre">Мистика / Фэнтези</div>
-                    <h3>ЛИСИЙ НАРОД</h3>
-                    <div class="card-footer">
-                        <span class="age-rating">18+</span>
-                        <div class="btn-read" onclick="event.stopPropagation(); openReader('stories/the_fox_folk/the_fox_folk.md', 'ЛИСИЙ НАРОД')">ЧИТАТЬ →</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="content-grid" id="storiesGrid"></div>
     </section>
 
     <!-- СТАТЬИ -->
     <section id="articles" class="content-section" style="display:none;">
-        <div class="content-grid">
-            <div class="card" data-file="articles/albus_dumbledore/albus_dumbledore.md">
-                <div class="card-image-wrapper" onclick="event.stopPropagation();">
-                    <img class="card-image" src="cap/covers/albus_dumbledore.jpg" alt="ЦЕНА МУДРОСТИ АЛЬБУСА ДАМБЛДОРА">
-                </div>
-                <div class="card-content" onclick="openReader('articles/albus_dumbledore/albus_dumbledore.md', 'ЦЕНА МУДРОСТИ АЛЬБУСА ДАМБЛДОРА')">
-                    <div class="card-genre">Аналитика / Статья</div>
-                    <h3>ЦЕНА МУДРОСТИ АЛЬБУСА ДАМБЛДОРА</h3>
-                    <div class="card-footer">
-                        <span class="age-rating">14+</span>
-                        <div class="btn-read" onclick="event.stopPropagation(); openReader('articles/albus_dumbledore/albus_dumbledore.md', 'ЦЕНА МУДРОСТИ АЛЬБУСА ДАМБЛДОРА')">ЧИТАТЬ →</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="content-grid" id="articlesGrid"></div>
     </section>
 
     <!-- ПОДДЕРЖКА -->
@@ -1039,7 +1045,7 @@
     <section id="contact" class="content-section" style="display:none;">
         <div class="contact-header">
             <h2>Давайте создавать вместе</h2>
-            <p>Всегда открыт для идей, коллабораций и общения с читателями.</p>
+            <p>Всегда открыт для идей и общения с читателями.</p>
         </div>
         <div class="contact-grid">
             <a href="https://t.me/lancev_dark" class="contact-card" target="_blank">
@@ -1114,47 +1120,86 @@ async function fetchWithCache(path) {
     } catch(e) { throw e; }
 }
 
-// ========== ДАННЫЕ ==========
-const availableTexts = [
-    { path: 'stories/mission_hades/mission_hades.md', title: 'МИССИЯ АИД', type: 'Рассказ' },
-    { path: 'stories/bear_at_a_crossroads/bear_at_a_crossroads.md', title: 'МЕДВЕДЬ НА ПЕРЕПУТЬЕ', type: 'Рассказ' },
-    { path: 'stories/the_fox_folk/the_fox_folk.md', title: 'ЛИСИЙ НАРОД', type: 'Рассказ' },
-    { path: 'articles/albus_dumbledore/albus_dumbledore.md', title: 'ЦЕНА МУДРОСТИ АЛЬБУСА ДАМБЛДОРА', type: 'Статья' }
+// ========== КАРТОЧКИ РАССКАЗОВ ==========
+const storiesData = [
+    {
+        path: 'stories/the_fox_folk/the_fox_folk.md',
+        title: 'ЛИСИЙ НАРОД',
+        shortTitle: 'ЛИСИЙ НАРОД',
+        genre: 'Тёмное фэнтези',
+        age: '18+',
+        cover: 'the_fox_folk.jpg',
+        type: 'Рассказ'
+    },
+    {
+        path: 'stories/mission_hades/mission_hades.md',
+        title: 'МИССИЯ «АИД»',
+        shortTitle: 'МИССИЯ «АИД»',
+        genre: 'Научная фантастика',
+        age: '18+',
+        cover: 'mission_hades.jpg',
+        type: 'Рассказ'
+    },
+    {
+        path: 'stories/bear_at_a_crossroads/bear_at_a_crossroads.md',
+        title: 'МЕДВЕДЬ НА ПЕРЕПУТЬЕ',
+        shortTitle: 'МЕДВЕДЬ НА ПЕРЕПУТЬЕ',
+        genre: 'Тёмное фэнтези',
+        age: '18+',
+        cover: 'bear_at_a_crossroads.jpg',
+        type: 'Рассказ'
+    }
 ];
-
-let currentStoryId = "", currentStoryTitle = "";
-let bookmarksData = JSON.parse(localStorage.getItem('dim_bookmarks') || '{}');
-let scrollHandler = null, progBar = null;
-let idCounter = 0;
-
-function generateSecureId() { return `sec_${Date.now()}_${idCounter++}_${Math.random().toString(36).substring(2, 8)}`; }
-function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
-function throttle(func, delay) { let lastCall = 0; return function(...args) { const now = Date.now(); if (now - lastCall >= delay) { lastCall = now; func.apply(this, args); } }; }
-
-// ========== НАВИГАЦИЯ ==========
-function setActiveTab(tabId) {
-    document.querySelectorAll('.tab-link').forEach(tab => {
-        if (tab.dataset.tab === tabId) tab.classList.add('active');
-        else tab.classList.remove('active');
-    });
-    const stories = document.getElementById('stories');
-    const articles = document.getElementById('articles');
-    const support = document.getElementById('support');
-    const contact = document.getElementById('contact');
-    if (stories) stories.style.display = tabId === 'stories' ? 'block' : 'none';
-    if (articles) articles.style.display = tabId === 'articles' ? 'block' : 'none';
-    if (support) support.style.display = tabId === 'support' ? 'block' : 'none';
-    if (contact) contact.style.display = tabId === 'contact' ? 'block' : 'none';
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) searchInput.value = '';
+// ========== КАРТОЧКИ СТАТЕЙ ==========
+const articlesData = [
+    {
+        path: 'articles/albus_dumbledore/albus_dumbledore.md',
+        title: 'ЦЕНА МУДРОСТИ АЛЬБУСА ДАМБЛДОРА',
+        shortTitle: 'ЦЕНА МУДРОСТИ АЛЬБУСА ДАМБЛДОРА',
+        genre: 'Аналитика',
+        age: '16+',
+        cover: 'albus_dumbledore.jpg',
+        type: 'Статья'
+    },
+    {
+        path: 'articles/cuckoos_nest/cuckoos_nest.md',
+        title: 'Пролетая над гнездом кукушки. Почему мы сами держим себя в клетке',
+        shortTitle: 'ПРОЛЕТАЯ НАД ГНЕЗДОМ КУКУШКИ',
+        genre: 'Аналитика',
+        age: '18+',
+        cover: 'cuckoos_nest.jpeg',
+        type: 'Статья'
+    }
+];
+// ========== РЕНДЕР КАРТОЧЕК ==========
+function renderCards(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    container.innerHTML = data.map(item => `
+        <div class="card" data-file="${item.path}">
+            <div class="card-image-wrapper" onclick="event.stopPropagation();">
+                <img class="card-image" src="covers/${item.cover}" alt="${item.title}">
+            </div>
+            <div class="card-content" onclick="openReader('${item.path}', '${item.title.replace(/'/g, "\\'")}')">
+                <div class="card-genre">${item.genre}</div>
+                <h3>${item.shortTitle}</h3>
+                <div class="card-footer">
+                    <span class="age-rating">${item.age}</span>
+                    <div class="btn-read" onclick="event.stopPropagation(); openReader('${item.path}', '${item.title.replace(/'/g, "\\'")}')">ЧИТАТЬ →</div>
+                </div>
+            </div>
+        </div>
+    `).join('');
 }
 
 // ========== ПОИСК ==========
-const searchIndex = new Map();
+let searchIndex = new Map();
 let searchIndexReady = false;
 
 async function buildSearchIndex() {
-    for (const item of availableTexts) {
+    const allItems = [...storiesData, ...articlesData];
+    for (const item of allItems) {
         try {
             const content = await fetchWithCache(item.path);
             searchIndex.set(item.path, { ...item, content });
@@ -1187,6 +1232,7 @@ function setupSearch() {
     const resultsDiv = document.getElementById('searchResults');
     const clearBtn = document.getElementById('clearSearchBtn');
     if (!input) return;
+    
     const performSearch = debounce(() => {
         if (!searchIndexReady) return;
         const q = input.value.trim().toLowerCase();
@@ -1219,12 +1265,32 @@ function setupSearch() {
             });
         });
     }, 300);
+    
     input.addEventListener('input', performSearch);
     if (clearBtn) clearBtn.addEventListener('click', () => { input.value = ''; resultsDiv.classList.remove('show'); clearBtn.style.display = 'none'; });
     document.addEventListener('click', (e) => { if (resultsDiv && !input.contains(e.target) && !resultsDiv.contains(e.target)) resultsDiv.classList.remove('show'); });
 }
 
+// ========== НАВИГАЦИЯ ==========
+function setActiveTab(tabId) {
+    document.querySelectorAll('.tab-link').forEach(tab => {
+        if (tab.dataset.tab === tabId) tab.classList.add('active');
+        else tab.classList.remove('active');
+    });
+    const stories = document.getElementById('stories');
+    const articles = document.getElementById('articles');
+    const support = document.getElementById('support');
+    const contact = document.getElementById('contact');
+    if (stories) stories.style.display = tabId === 'stories' ? 'block' : 'none';
+    if (articles) articles.style.display = tabId === 'articles' ? 'block' : 'none';
+    if (support) support.style.display = tabId === 'support' ? 'block' : 'none';
+    if (contact) contact.style.display = tabId === 'contact' ? 'block' : 'none';
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.value = '';
+}
+
 // ========== ПРОГРЕСС-БАР ==========
+let progBar = null;
 function initProgressBar() { progBar = document.getElementById('readingProgressBar'); }
 const updateProgress = throttle((overlay) => {
     const percent = overlay.scrollHeight - overlay.clientHeight ? Math.round((overlay.scrollTop / (overlay.scrollHeight - overlay.clientHeight)) * 100) : 0;
@@ -1238,6 +1304,14 @@ const updateProgress = throttle((overlay) => {
 // ========== КНОПКИ ЧИТАЛКИ НА МОБИЛЬНЫХ ==========
 let controlsVisible = true;
 let mobileReaderHandler = null;
+let currentStoryId = "", currentStoryTitle = "";
+let bookmarksData = JSON.parse(localStorage.getItem('dim_bookmarks') || '{}');
+let scrollHandler = null;
+let idCounter = 0;
+
+function generateSecureId() { return `sec_${Date.now()}_${idCounter++}_${Math.random().toString(36).substring(2, 8)}`; }
+function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+function throttle(func, delay) { let lastCall = 0; return function(...args) { const now = Date.now(); if (now - lastCall >= delay) { lastCall = now; func.apply(this, args); } }; }
 
 function toggleControls() {
     const controls = document.getElementById('readerControls');
@@ -1308,7 +1382,7 @@ async function openReader(path, title) {
         if (path.endsWith('.md')) htmlContent = await marked.parse(content);
         else htmlContent = content.split('\n').filter(p => p.trim()).map(p => '<p>' + escapeHtml(p) + '</p>').join('');
         readerBody.innerHTML = '<h1>' + escapeHtml(title) + '</h1>' + htmlContent;
-        
+        applySavedFontSize();
         const headers = readerBody.querySelectorAll('h2, h3');
         headers.forEach(h => { if (!h.id) h.id = generateSecureId(); });
         
@@ -1351,8 +1425,18 @@ function closeReader() {
 
 function toggleReaderTheme() { document.getElementById('readerContent').classList.toggle('night-mode'); }
 function toggleFontSlider() { const s = document.getElementById('fontSliderContainer'); if (s) s.style.display = s.style.display === 'flex' ? 'none' : 'flex'; }
-function updateFontSize(v) { document.querySelectorAll('#readerBody p').forEach(p => p.style.fontSize = v + 'em'); }
-
+function updateFontSize(v) {
+    document.querySelectorAll('#readerBody p').forEach(p => p.style.fontSize = v + 'em');
+    localStorage.setItem('reader_font_size', v);
+}
+function applySavedFontSize() {
+    const saved = localStorage.getItem('reader_font_size');
+    if (saved) {
+        const slider = document.querySelector('#fontSliderContainer input');
+        if (slider) slider.value = saved;
+        document.querySelectorAll('#readerBody p').forEach(p => p.style.fontSize = saved + 'em');
+    }
+}
 function toggleTOC() {
     const modal = document.getElementById('tocModal');
     if (!modal) return;
@@ -1490,7 +1574,6 @@ if (slides.length > 0) {
     }, 5000);
 }
 
-// ========== ПЛАВНЫЙ СКРОЛЛ ==========
 function scrollToNav() {
     const nav = document.querySelector('nav');
     if (nav) nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1505,12 +1588,12 @@ async function checkFileExists(path) {
 }
 
 async function checkAllCards() {
-    const cards = document.querySelectorAll('.card');
-    for (const card of cards) {
-        const filePath = card.getAttribute('data-file');
-        if (filePath) {
-            const exists = await checkFileExists(filePath);
-            if (!exists) card.classList.add('missing');
+    const allItems = [...storiesData, ...articlesData];
+    for (const item of allItems) {
+        const exists = await checkFileExists(item.path);
+        if (!exists) {
+            const card = document.querySelector(`.card[data-file="${item.path}"]`);
+            if (card) card.classList.add('missing');
         }
     }
 }
@@ -1539,7 +1622,6 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// ========== ESC ==========
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         const readerOverlay = document.getElementById('readerOverlay');
@@ -1557,7 +1639,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ========== АНИМАЦИЯ КАРТОЧЕК ПРИ ПРОКРУТКЕ (МОБИЛЬНЫЕ) ==========
+// ========== АНИМАЦИЯ КАРТОЧЕК НА МОБИЛЬНЫХ ==========
 function initCardAnimation() {
     if (window.innerWidth > 768) return;
     const cards = document.querySelectorAll('.card');
@@ -1576,11 +1658,11 @@ function initCardAnimation() {
                 if (img) img.style.filter = 'grayscale(100%)';
             }
         });
-    }, { threshold: 0.9 });
+    }, { threshold: 0.5 });
     cards.forEach(card => observer.observe(card));
 }
 
-// ========== ЗАЩИТА ОТ КОПИРОВАНИЯ (ТИХО) ==========
+// ========== ЗАЩИТА ОТ КОПИРОВАНИЯ ==========
 document.addEventListener('copy', function(e) {
     const overlay = document.getElementById('readerOverlay');
     if (overlay && overlay.style.display === 'block') {
@@ -1617,10 +1699,14 @@ document.addEventListener('keydown', function(e) {
 
 // ========== ИНИЦИАЛИЗАЦИЯ ==========
 document.addEventListener('DOMContentLoaded', async () => {
+    renderCards('storiesGrid', storiesData);
+    renderCards('articlesGrid', articlesData);
+    
     document.querySelectorAll('.tab-link').forEach(tab => {
         tab.addEventListener('click', () => setActiveTab(tab.dataset.tab));
     });
     setActiveTab('stories');
+    
     await buildSearchIndex();
     setupSearch();
     checkAllCards();
