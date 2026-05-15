@@ -1181,6 +1181,24 @@ const storiesData = [
         type: 'Рассказ'
     },
     {
+        path: 'stories/detective_murr/det_murr_1.md',
+        title: 'Детектив Мурр и «Чистая Лапа I»',
+        shortTitle: 'Детектив Мурр и «Чистая лапа I»',
+        genre: 'Детектив',
+        age: '16+',
+        cover: 'det_murr_1.jpg',
+        type: 'Рассказ'
+    },
+    {
+        path: 'stories/new_guy/new_guy.md',
+        title: 'Новенький из Параллельного Класса',
+        shortTitle: 'Новенький из Параллельного Класса',
+        genre: 'Школьное фэнтези',
+        age: '16+',
+        cover: 'new_guy.jpg',
+        type: 'Рассказ'
+    },
+    {
         path: 'stories/bear_at_a_crossroads/bear_at_a_crossroads.md',
         title: 'МЕДВЕДЬ НА ПЕРЕПУТЬЕ',
         shortTitle: 'МЕДВЕДЬ НА ПЕРЕПУТЬЕ',
@@ -1207,7 +1225,7 @@ const articlesData = [
         shortTitle: 'ПРОЛЕТАЯ НАД ГНЕЗДОМ КУКУШКИ',
         genre: 'Аналитика',
         age: '18+',
-        cover: 'cuckoos_nest.jpeg',
+        cover: 'cuckoos_nest.jpg',
         type: 'Статья'
     }
 ];
@@ -1698,7 +1716,7 @@ function initCardAnimation() {
                 if (img) img.style.filter = 'grayscale(100%)';
             }
         });
-    }, { threshold: 0.5 });
+    }, { threshold: 0.9 });
     cards.forEach(card => observer.observe(card));
 }
 
