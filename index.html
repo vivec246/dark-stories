@@ -180,9 +180,11 @@
             font-weight: 700;
             letter-spacing: 4px;
             text-transform: uppercase;
-            color: rgba(224,232,245,0.4);
+            color: var(--accent);
+            opacity: 1;
             writing-mode: vertical-rl;
             animation: textGlow 2s ease-in-out infinite;
+            text-shadow: 0 0 15px rgba(136, 170, 221, 0.6);
         }
         .scroll-line {
             width: 1px;
@@ -1173,7 +1175,7 @@
     </div>
     <div class="search-container">
         <div class="search-input-wrapper">
-            <input type="text" id="searchInput" placeholder="Поиск по текстам..." autocomplete="off">
+            <input type="text" id="searchInput" placeholder="ПОИСК..." autocomplete="off">
             <button class="clear-search" id="clearSearchBtn" style="display:none;">✕</button>
             <button class="search-btn" id="searchBtn"><i class="fas fa-search"></i></button>
         </div>
