@@ -68,8 +68,14 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
         }
+        html {
+            background: var(--bg-dark);
+            overscroll-behavior-y: none;
+        }
+        body { overscroll-behavior-y: none; }
 
         @media (max-width: 768px) {
+            html { background: #000 !important; }
             body { background: #000 !important; }
             .reader-overlay { background: #000 !important; }
             .support-tab-section, .contact-card, .modal-box, .support-modal-content {
