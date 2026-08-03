@@ -554,15 +554,20 @@
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 3px;
-            color: var(--accent);
+            color: #ffffff;
             text-transform: uppercase;
             opacity: 0;
             transform: translateY(10px);
             transition: opacity 0.3s ease, transform 0.3s ease;
             margin-bottom: 6px;
+            -webkit-text-stroke: 0.6px rgba(0,0,0,0.7);
             text-shadow: 
-                0 0 15px rgba(0, 0, 0, 1),
-                0 0 30px rgba(0, 0, 0, 0.9);
+                -1px -1px 0 rgba(0,0,0,0.85),
+                1px -1px 0 rgba(0,0,0,0.85),
+                -1px 1px 0 rgba(0,0,0,0.85),
+                1px 1px 0 rgba(0,0,0,0.85),
+                0 0 10px rgba(0,0,0,0.9),
+                0 0 22px rgba(0,0,0,0.7);
         }
         .card h3 {
             font-family: 'Montserrat', sans-serif;
@@ -609,10 +614,10 @@
                 0 2px 15px rgba(0, 0, 0, 1);
         }
         .btn-read {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(136,170,221,0.12);
+            border: 1px solid var(--accent);
             border-radius: 20px;
-            color: rgba(224,232,245,0.6);
+            color: var(--accent);
             font-family: 'Montserrat', sans-serif;
             font-size: 9px;
             font-weight: 700;
@@ -622,12 +627,13 @@
             padding: 5px 14px;
             transition: background 0.3s, border-color 0.3s, color 0.3s, box-shadow 0.3s;
             text-shadow: none;
+            box-shadow: 0 0 14px rgba(136,170,221,0.55);
         }
         .btn-read:hover {
-            background: rgba(136,170,221,0.12);
-            color: var(--accent);
-            border-color: var(--accent);
-            box-shadow: 0 0 14px rgba(136,170,221,0.55);
+            background: rgba(255,255,255,0.1);
+            color: #ffffff;
+            border-color: rgba(255,255,255,0.8);
+            box-shadow: 0 0 14px rgba(255,255,255,0.6);
         }
         .btn-desc {
             background: transparent;
