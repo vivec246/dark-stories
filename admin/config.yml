@@ -1,0 +1,75 @@
+# ============================================================
+# КОНФИГ АДМИНКИ DARK STORIES
+# ============================================================
+# Пока подключён локальный тестовый режим (local_backend: true) —
+# он позволяет открыть админку и потыкать формы БЕЗ настройки
+# входа через GitHub. Когда будете готовы выложить админку на
+# реальный сайт — удалите строку local_backend и подключим
+# GitHub-авторизацию отдельным шагом.
+
+local_backend: true
+
+backend:
+  name: github
+  repo: vivec246/dark-stories   # владелец/название репозитория — поправьте, если не так
+  branch: main
+
+# Куда складываются загруженные через форму обложки
+media_folder: "covers"
+public_folder: "covers"
+
+collections:
+
+  # ---------- РАССКАЗЫ ----------
+  - name: "stories"
+    label: "Рассказы"
+    label_singular: "Рассказ"
+    folder: "stories"
+    path: "{{slug}}/{{slug}}"     # сохраняет как stories/имя-файла/имя-файла.md — как у вас сейчас
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Заголовок (полный, с кавычками если нужно)", name: "title", widget: "string" }
+      - { label: "Короткий заголовок (на карточке)", name: "shortTitle", widget: "string" }
+      - { label: "Описание (на карточке)", name: "desc", widget: "text" }
+      - label: "Жанр"
+        name: "genre"
+        widget: "select"
+        options:
+          - "Тёмное фэнтези"
+          - "Научная фантастика"
+          - "Детектив"
+          - "Школьное фэнтези"
+          - "Философское фэнтези"
+      - label: "Возрастной рейтинг"
+        name: "age"
+        widget: "select"
+        options: ["12+", "16+", "18+"]
+      - { label: "Год", name: "year", widget: "string", default: "2026" }
+      - { label: "Обложка", name: "cover", widget: "image" }
+      - { label: "Текст рассказа", name: "body", widget: "markdown" }
+
+  # ---------- СТАТЬИ ----------
+  - name: "articles"
+    label: "Статьи"
+    label_singular: "Статья"
+    folder: "articles"
+    path: "{{slug}}/{{slug}}"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Заголовок", name: "title", widget: "string" }
+      - { label: "Короткий заголовок (на карточке)", name: "shortTitle", widget: "string" }
+      - { label: "Описание (на карточке)", name: "desc", widget: "text" }
+      - label: "Жанр"
+        name: "genre"
+        widget: "select"
+        options:
+          - "Аналитика"
+      - label: "Возрастной рейтинг"
+        name: "age"
+        widget: "select"
+        options: ["12+", "16+", "18+"]
+      - { label: "Год", name: "year", widget: "string", default: "2026" }
+      - { label: "Обложка", name: "cover", widget: "image" }
+      - { label: "Текст статьи", name: "body", widget: "markdown" }
