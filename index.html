@@ -484,7 +484,7 @@
             width: 100%; height: 100%;
             object-fit: cover;
             display: block;
-            filter: grayscale(100%) brightness(0.85);
+            filter: grayscale(60%) brightness(0.85);
             transition: filter 0.4s ease, transform 0.4s ease;
         }
         .card:hover .card-image {
@@ -517,8 +517,18 @@
             cursor: pointer;
             opacity: 1;
             transition: border-color 0.25s ease, background 0.25s ease, transform 0.15s ease;
+            position: relative;
         }
-        .card-favorite-badge .icon { width: 13px; height: 13px; color: rgba(224,232,245,0.6); transition: color 0.25s ease; }
+        .card-favorite-badge .icon {
+            width: 13px;
+            height: 13px;
+            color: rgba(224,232,245,0.6);
+            transition: color 0.25s ease;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
         .card-favorite-badge:hover { border-color: var(--accent); transform: scale(1.08); }
         .card-favorite-badge.active { border-color: rgba(255,255,255,0.75); background: rgba(255,255,255,0.1); box-shadow: 0 0 14px rgba(255,255,255,0.55); }
         .card-favorite-badge.active .icon { color: #ffffff; fill: #ffffff; filter: drop-shadow(0 0 4px rgba(255,255,255,0.9)); }
@@ -2282,10 +2292,8 @@ if (backToTopBtn) {
 
     backToTopBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        // Вычисляем позицию, где заканчивается хедер и начинается навигация
         const header = document.querySelector('header');
         if (header) {
-            // Высота хедера (100vh) минус небольшой отступ
             const targetPosition = header.offsetHeight - 1;
             window.scrollTo({
                 top: targetPosition,
@@ -2326,7 +2334,7 @@ window.addEventListener('appinstalled', () => {
 
     let lastScrollY = window.scrollY;
     let ticking = false;
-    const THRESHOLD = 8; // минимальный сдвиг, чтобы не дёргалось от микро-скролла
+    const THRESHOLD = 8;
     const headerHeight = () => document.querySelector('header')?.offsetHeight || 0;
 
     function onScroll() {
@@ -2339,14 +2347,13 @@ window.addEventListener('appinstalled', () => {
         const currentY = window.scrollY;
         const diff = currentY - lastScrollY;
 
-        // Пока не проскроллили ниже шапки — не трогаем nav
         if (currentY < headerHeight()) {
             nav.classList.remove('nav-hidden');
         } else if (Math.abs(diff) > THRESHOLD) {
             if (diff > 0) {
-                nav.classList.add('nav-hidden');   // скролл вниз — прячем
+                nav.classList.add('nav-hidden');
             } else {
-                nav.classList.remove('nav-hidden'); // скролл вверх — показываем
+                nav.classList.remove('nav-hidden');
             }
             lastScrollY = currentY;
         }
@@ -2396,10 +2403,6 @@ async function checkAllCards() {
 }
 
 // ========== УВЕДОМЛЕНИЯ О НОВЫХ РАССКАЗАХ ==========
-// Не настоящий server push (нужен бэкенд с VAPID-ключами, чтобы слать
-// уведомления даже при закрытом сайте) — а локальная проверка: при каждом
-// заходе браузер сравнивает список рассказов/статей со снимком из прошлого
-// визита и показывает обычное уведомление, если что-то новое появилось.
 const notifyToggle = document.getElementById('notifyToggle');
 
 function isNotifyEnabled() {
