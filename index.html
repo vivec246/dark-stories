@@ -1141,6 +1141,72 @@
         }
         .delete-bm { color: var(--error-red); cursor: pointer; padding: 4px 6px; }
 
+        /* ========== КОНТЕКСТНОЕ МЕНЮ ЧИТАЛКИ ========== */
+        .context-menu {
+            position: fixed;
+            z-index: 5500;
+            display: none;
+            min-width: 190px;
+            background: rgba(15,20,30,0.98);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(136,170,221,0.4);
+            border-radius: 14px;
+            padding: 6px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+        .context-menu.show { display: block; }
+        .context-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 12.5px;
+            letter-spacing: 0.3px;
+            color: var(--text-light);
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .context-menu-item .icon { width: 15px; height: 15px; color: var(--accent); flex-shrink: 0; }
+        .context-menu-item:hover { background: rgba(136,170,221,0.14); color: #fff; }
+        .context-menu-item:hover .icon { color: #fff; }
+
+        /* ========== ПОПАП «ПРОЦИТИРОВАТЬ» ========== */
+        .quote-preview {
+            background: rgba(255,255,255,0.04);
+            border-left: 2px solid var(--accent);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: rgba(224,232,245,0.8);
+            max-height: 140px;
+            overflow-y: auto;
+            margin-bottom: 18px;
+            font-style: italic;
+        }
+        .quote-share-actions { display: flex; flex-direction: column; gap: 10px; }
+        .quote-share-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(136,170,221,0.25);
+            border-radius: 12px;
+            padding: 11px 16px;
+            color: var(--text-light);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 12.5px;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+        }
+        .quote-share-btn:hover { border-color: var(--accent); background: rgba(136,170,221,0.1); color: #fff; }
+        .quote-share-btn .icon { width: 18px; height: 18px; color: var(--accent); flex-shrink: 0; }
+
         /* ========== КНОПКА НАВЕРХ ========== */
         .back-to-top {
             position: fixed;
@@ -1350,12 +1416,6 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(136,170,221,0.4); border-radius: 2px; }
 
-        .reader-body { user-select: none; -webkit-user-select: none; }
-        .reader-overlay { user-select: none; -webkit-user-select: none; }
-        button, input, textarea, .btn-read, .tab-link, .control-btn, .search-input-wrapper {
-            user-select: auto; -webkit-user-select: auto;
-        }
-
         @media (max-width: 768px) {
             .reader-controls { top: 10px; right: 10px; gap: 8px; }
             .control-btn { width: 38px; height: 38px; }
@@ -1441,6 +1501,45 @@
     <div id="readerContent" class="reader-content night-mode"><div id="readerBody" class="reader-body"></div></div>
 </div>
 
+<!-- ========== КОНТЕКСТНОЕ МЕНЮ ЧИТАЛКИ ========== -->
+<div id="readerContextMenu" class="context-menu" role="menu">
+    <div class="context-menu-item" data-action="copy" role="menuitem">
+        <svg class="icon icon-stroke" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        <span>Копировать</span>
+    </div>
+    <div class="context-menu-item" data-action="quote" role="menuitem">
+        <svg class="icon icon-stroke" viewBox="0 0 24 24"><path d="M13 5v3.5C6.5 9.2 3 13 2 19c2-3.3 5.3-5.5 11-5.5V17l9-6-9-6z"/></svg>
+        <span>Процитировать</span>
+    </div>
+    <div class="context-menu-item" data-action="selectAll" role="menuitem">
+        <svg class="icon icon-stroke" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        <span>Выделить всё</span>
+    </div>
+</div>
+
+<!-- ========== ПОПАП «ПРОЦИТИРОВАТЬ» ========== -->
+<div id="quoteShareModal" class="support-modal" onclick="if(event.target==this) closeQuoteShare()">
+    <div class="support-modal-content">
+        <button onclick="closeQuoteShare()" style="position:absolute; top:12px; right:14px; background:none; border:none; color:rgba(255,255,255,0.3); font-size:18px; cursor:pointer;">✕</button>
+        <h3 style="font-family:Montserrat; font-size:10px; letter-spacing:3px; margin-bottom:16px; color:var(--accent);">ПРОЦИТИРОВАТЬ</h3>
+        <div id="quoteSharePreview" class="quote-preview"></div>
+        <div class="quote-share-actions">
+            <a id="quoteShareVk" class="quote-share-btn" target="_blank" rel="noopener" onclick="closeQuoteShare()">
+                <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><text x="12" y="16" text-anchor="middle" font-size="10" font-family="Montserrat, sans-serif" font-weight="700" fill="currentColor">VK</text></svg>
+                <span>Поделиться ВКонтакте</span>
+            </a>
+            <a id="quoteShareTelegram" class="quote-share-btn" target="_blank" rel="noopener" onclick="closeQuoteShare()">
+                <svg class="icon icon-stroke" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                <span>Поделиться в Telegram</span>
+            </a>
+            <div class="quote-share-btn" onclick="copyQuoteToClipboard()">
+                <svg class="icon icon-stroke" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                <span>Скопировать цитату</span>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ========== ОГЛАВЛЕНИЕ ========== -->
 <div id="tocModal" class="table-of-contents" onclick="if(event.target==this) toggleTOC()">
     <div class="toc-modal-box">
@@ -1475,7 +1574,7 @@
             <span class="author-name">Дмитрий Ланцев</span>
         </div>
     </div>
-    <div class="scroll-indicator" onclick="scrollToNav()">
+    <div class="scroll-indicator" onclick="scrollToNav()" role="button" tabindex="0" aria-label="Прокрутить к навигации">
         <span>ВНИЗ</span>
         <div class="scroll-line"></div>
     </div>
@@ -1483,24 +1582,24 @@
 
 <!-- ========== НАВИГАЦИЯ ========== -->
 <nav class="tabs">
-    <div class="nav-links">
-        <div class="tab-link" data-tab="shelf">
+    <div class="nav-links" role="tablist">
+        <div class="tab-link" data-tab="shelf" role="tab" tabindex="0" aria-selected="false">
             <svg class="icon icon-stroke" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             <span>Избранное</span>
         </div>
-        <div class="tab-link active" data-tab="stories">
+        <div class="tab-link active" data-tab="stories" role="tab" tabindex="0" aria-selected="true">
             <svg class="icon icon-stroke" viewBox="0 0 24 24"><path d="M2 4h7a4 4 0 014 4v12a3 3 0 00-3-3H2z"/><path d="M22 4h-7a4 4 0 00-4 4v12a3 3 0 013-3h8z"/></svg>
             <span>Книги</span>
         </div>
-        <div class="tab-link" data-tab="articles">
+        <div class="tab-link" data-tab="articles" role="tab" tabindex="0" aria-selected="false">
             <svg class="icon icon-stroke" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><line x1="8" y1="9" x2="10" y2="9"/></svg>
             <span>Статьи</span>
         </div>
-        <div class="tab-link" data-tab="support">
+        <div class="tab-link" data-tab="support" role="tab" tabindex="0" aria-selected="false">
             <svg class="icon icon-stroke" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><text x="12" y="16" text-anchor="middle" font-size="11" font-family="Montserrat, sans-serif" font-weight="700" fill="currentColor" stroke="none">₽</text></svg>
             <span>Донат</span>
         </div>
-        <div class="tab-link" data-tab="contact">
+        <div class="tab-link" data-tab="contact" role="tab" tabindex="0" aria-selected="false">
             <svg class="icon icon-stroke" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
             <span>Связь</span>
         </div>
@@ -1608,11 +1707,11 @@
             <div class="footer-subtitle">Дмитрий Ланцев</div>
         </div>
         <div class="footer-links">
-            <span onclick="openFooterModal('policy')">Политика</span>
+            <span onclick="openFooterModal('policy')" role="button" tabindex="0">Политика</span>
             <span class="separator">•</span>
-            <span onclick="openFooterModal('copyright')">Авторские права</span>
+            <span onclick="openFooterModal('copyright')" role="button" tabindex="0">Авторские права</span>
             <span class="separator">•</span>
-            <span onclick="openFooterModal('about')">2026</span>
+            <span onclick="openFooterModal('about')" role="button" tabindex="0">2026</span>
         </div>
     </div>
 </footer>
@@ -1630,6 +1729,43 @@
 <div id="toastContainer" class="toast-container"></div>
 
 <script>
+// ========== БЕЗОПАСНЫЙ ДОСТУП К localStorage ==========
+// localStorage может быть недоступен: приватный режим в старых Safari,
+// отключённое хранилище в настройках браузера, сайт в песочнице iframe и т.д.
+// Без этой обёртки такие обращения выбрасывают исключение и ломают весь скрипт.
+let storageWarned = false;
+function warnStorageUnavailable() {
+    if (storageWarned) return;
+    storageWarned = true;
+    console.warn('localStorage недоступен — избранное, закладки и прогресс чтения не будут сохраняться между визитами.');
+}
+function safeStorageGet(key, fallback = null) {
+    try {
+        const value = localStorage.getItem(key);
+        return value === null ? fallback : value;
+    } catch(e) {
+        warnStorageUnavailable();
+        return fallback;
+    }
+}
+function safeStorageSet(key, value) {
+    try {
+        localStorage.setItem(key, value);
+        return true;
+    } catch(e) {
+        warnStorageUnavailable();
+        return false;
+    }
+}
+function safeJSONGet(key, fallback) {
+    try {
+        const raw = safeStorageGet(key, null);
+        return raw === null ? fallback : JSON.parse(raw);
+    } catch(e) {
+        return fallback;
+    }
+}
+
 // ========== ТОСТ-УВЕДОМЛЕНИЯ ==========
 function showToast(message, type = 'info', duration = 3200) {
     const container = document.getElementById('toastContainer');
@@ -1763,12 +1899,12 @@ const articlesData = [
 
 // ========== РЕНДЕР КАРТОЧЕК ==========
 // ========== ИЗБРАННОЕ ==========
-let favoritesSet = new Set(JSON.parse(localStorage.getItem('dim_favorites') || '[]'));
+let favoritesSet = new Set(safeJSONGet('dim_favorites', []));
 
 function isFavorite(path) { return favoritesSet.has(path); }
 
 function saveFavorites() {
-    localStorage.setItem('dim_favorites', JSON.stringify([...favoritesSet]));
+    safeStorageSet('dim_favorites', JSON.stringify([...favoritesSet]));
 }
 
 function toggleFavorite(path) {
@@ -1779,16 +1915,25 @@ function toggleFavorite(path) {
     }
     saveFavorites();
     document.querySelectorAll('.card-favorite-badge').forEach(btn => {
-        if (btn.dataset.path === path) btn.classList.toggle('active', favoritesSet.has(path));
+        if (btn.dataset.path !== path) return;
+        const isFav = favoritesSet.has(path);
+        btn.classList.toggle('active', isFav);
+        btn.setAttribute('aria-pressed', String(isFav));
+        const label = isFav ? 'Убрать из избранного' : 'Добавить в избранное';
+        btn.setAttribute('aria-label', label);
+        btn.setAttribute('title', label);
     });
     renderShelf();
 }
 
 function cardHTML(item) {
-    const fav = isFavorite(item.path) ? 'active' : '';
+    const isFav = isFavorite(item.path);
+    const fav = isFav ? 'active' : '';
     const escTitle = item.title.replace(/'/g, "\\'");
+    const safeTitle = escapeHtml(item.title);
+    const favLabel = isFav ? 'Убрать из избранного' : 'Добавить в избранное';
     return `
-        <div class="card" data-file="${item.path}" onclick="openReader('${item.path}', '${escTitle}')">
+        <div class="card" data-file="${item.path}" onclick="openReader('${item.path}', '${escTitle}')" role="button" tabindex="0" aria-label="Читать: ${safeTitle}">
             <div class="card-image-wrapper">
                 <img class="card-image"
                      src="covers/${item.cover}"
@@ -1799,7 +1944,7 @@ function cardHTML(item) {
                 </div>
                 <div class="card-badges">
                     <span class="card-year-badge">${item.year}</span>
-                    <span class="card-favorite-badge ${fav}" data-path="${item.path}" onclick="event.stopPropagation(); toggleFavorite('${item.path}')" title="В избранное">
+                    <span class="card-favorite-badge ${fav}" data-path="${item.path}" onclick="event.stopPropagation(); toggleFavorite('${item.path}')" role="button" tabindex="0" aria-pressed="${isFav}" aria-label="${favLabel}" title="${favLabel}">
                         <svg class="icon icon-fill" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                     </span>
                 </div>
@@ -1844,23 +1989,21 @@ function renderShelf() {
 }
 
 // ========== НЕДАВНО ЧИТАЛ ==========
-let recentIds = [];
-try { recentIds = JSON.parse(localStorage.getItem('dim_recent') || '[]'); }
-catch(e) { recentIds = []; }
+let recentIds = safeJSONGet('dim_recent', []);
 
 function addRecent(path) {
     recentIds = recentIds.filter(p => p !== path);
     recentIds.unshift(path);
     recentIds = recentIds.slice(0, 10);
-    try { localStorage.setItem('dim_recent', JSON.stringify(recentIds)); }
-    catch(e) { /* localStorage недоступен */ }
+    safeStorageSet('dim_recent', JSON.stringify(recentIds));
     renderRecentShelf();
 }
 
 function recentCardHTML(item) {
     const escTitle = item.title.replace(/'/g, "\\'");
+    const safeTitle = escapeHtml(item.title);
     return `
-        <div class="recent-card" onclick="openReader('${item.path}', '${escTitle}')">
+        <div class="recent-card" onclick="openReader('${item.path}', '${escTitle}')" role="button" tabindex="0" aria-label="Читать: ${safeTitle}">
             <div class="thumb">
                 <img src="covers/${item.cover}" alt="${item.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="fallback" style="display:none;">${item.genre}</div>
@@ -1979,7 +2122,9 @@ function setupSearch() {
 // ========== НАВИГАЦИЯ ==========
 function setActiveTab(tabId) {
     document.querySelectorAll('.tab-link').forEach(tab => {
-        tab.classList.toggle('active', tab.dataset.tab === tabId);
+        const isActive = tab.dataset.tab === tabId;
+        tab.classList.toggle('active', isActive);
+        tab.setAttribute('aria-selected', String(isActive));
     });
     ['shelf','stories','articles','support','contact'].forEach(id => {
         const el = document.getElementById(id);
@@ -2002,16 +2147,16 @@ const updateProgress = throttle((overlay) => {
         : 0;
     const fill = document.querySelector('.progress-bar-fill');
     if (fill) fill.style.width = pct + '%';
-    const saved = JSON.parse(localStorage.getItem('reading_progress') || '{}');
+    const saved = safeJSONGet('reading_progress', {});
     saved[currentStoryId] = { percent: pct, scrollTop: overlay.scrollTop, date: new Date().toISOString() };
-    localStorage.setItem('reading_progress', JSON.stringify(saved));
+    safeStorageSet('reading_progress', JSON.stringify(saved));
 }, 100);
 
 // ========== ЧИТАЛКА ==========
 let controlsVisible = true;
 let mobileReaderHandler = null;
 let currentStoryId = '', currentStoryTitle = '';
-let bookmarksData = JSON.parse(localStorage.getItem('dim_bookmarks') || '{}');
+let bookmarksData = safeJSONGet('dim_bookmarks', {});
 let scrollHandler = null;
 let idCounter = 0;
 let readerHistoryState = null;
@@ -2095,7 +2240,7 @@ async function openReader(path, title) {
         overlay.addEventListener('scroll', scrollHandler);
         setTimeout(() => updateProgress(overlay), 100);
 
-        const saved = JSON.parse(localStorage.getItem('reading_progress') || '{}')[currentStoryId];
+        const saved = safeJSONGet('reading_progress', {})[currentStoryId];
         if (saved && saved.scrollTop > 100) {
             setTimeout(() => { overlay.scrollTop = saved.scrollTop; updateProgress(overlay); }, 300);
         }
@@ -2150,10 +2295,10 @@ function toggleFontSlider() {
 }
 function updateFontSize(v) {
     document.querySelectorAll('#readerBody p').forEach(p => p.style.fontSize = v + 'em');
-    localStorage.setItem('reader_font_size', v);
+    safeStorageSet('reader_font_size', v);
 }
 function applySavedFontSize() {
-    const saved = localStorage.getItem('reader_font_size');
+    const saved = safeStorageGet('reader_font_size', null);
     if (!saved) return;
     const slider = document.querySelector('#fontSliderContainer input');
     if (slider) slider.value = saved;
@@ -2198,7 +2343,7 @@ function addCurrentBookmark() {
     if (!bookmarksData[currentStoryId]) bookmarksData[currentStoryId] = [];
     const overlay = document.getElementById('readerOverlay');
     bookmarksData[currentStoryId].push({ time: new Date().toLocaleTimeString(), text: currentStoryTitle, pos: overlay.scrollTop });
-    localStorage.setItem('dim_bookmarks', JSON.stringify(bookmarksData));
+    safeStorageSet('dim_bookmarks', JSON.stringify(bookmarksData));
     renderBookmarks();
 }
 function jumpToBookmark(i) {
@@ -2207,7 +2352,7 @@ function jumpToBookmark(i) {
 }
 function deleteBookmark(i) {
     bookmarksData[currentStoryId].splice(i, 1);
-    localStorage.setItem('dim_bookmarks', JSON.stringify(bookmarksData));
+    safeStorageSet('dim_bookmarks', JSON.stringify(bookmarksData));
     renderBookmarks();
 }
 
@@ -2400,7 +2545,7 @@ async function checkAllCards() {
 const notifyToggle = document.getElementById('notifyToggle');
 
 function isNotifyEnabled() {
-    return localStorage.getItem('dim_notify_enabled') === 'true'
+    return safeStorageGet('dim_notify_enabled', null) === 'true'
         && typeof Notification !== 'undefined' && Notification.permission === 'granted';
 }
 function updateNotifyToggleUI() {
@@ -2422,9 +2567,7 @@ async function showLocalNotification(title, body) {
 }
 function checkForNewStories() {
     if (!isNotifyEnabled()) return;
-    let previous = [];
-    try { previous = JSON.parse(localStorage.getItem('dim_notify_snapshot') || '[]'); }
-    catch(e) { previous = []; }
+    const previous = safeJSONGet('dim_notify_snapshot', []);
 
     const current = itemsSnapshot();
     if (previous.length) {
@@ -2435,8 +2578,7 @@ function checkForNewStories() {
             if (item) showLocalNotification('Dark Stories', 'Новое: ' + item.title);
         });
     }
-    try { localStorage.setItem('dim_notify_snapshot', JSON.stringify(current)); }
-    catch(e) { /* localStorage недоступен */ }
+    safeStorageSet('dim_notify_snapshot', JSON.stringify(current));
 }
 
 if (notifyToggle) {
@@ -2446,7 +2588,7 @@ if (notifyToggle) {
             return;
         }
         if (isNotifyEnabled()) {
-            localStorage.setItem('dim_notify_enabled', 'false');
+            safeStorageSet('dim_notify_enabled', 'false');
             updateNotifyToggleUI();
             showToast('Уведомления выключены');
             return;
@@ -2456,8 +2598,8 @@ if (notifyToggle) {
             : await Notification.requestPermission();
 
         if (permission === 'granted') {
-            localStorage.setItem('dim_notify_enabled', 'true');
-            try { localStorage.setItem('dim_notify_snapshot', JSON.stringify(itemsSnapshot())); } catch(e) {}
+            safeStorageSet('dim_notify_enabled', 'true');
+            safeStorageSet('dim_notify_snapshot', JSON.stringify(itemsSnapshot()));
             updateNotifyToggleUI();
             showToast('Уведомления о новых рассказах включены ✓');
         } else {
@@ -2465,6 +2607,18 @@ if (notifyToggle) {
         }
     });
 }
+
+// ========== КЛАВИАТУРНАЯ АКТИВАЦИЯ ЭЛЕМЕНТОВ С role="button"/role="tab" ==========
+// Такие элементы (карточки, звёздочка избранного, вкладки навигации, ссылки в футере)
+// сделаны на div/span ради вёрстки, а не на <button>, поэтому браузер не даёт им
+// нативной активации по Enter/Space — добавляем её вручную через делегирование.
+document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const target = e.target.closest('[role="button"], [role="tab"]');
+    if (!target) return;
+    e.preventDefault();
+    target.click();
+});
 
 // ========== ЗАКРЫТИЕ МОДАЛОК ========== 
 document.addEventListener('click', e => {
@@ -2478,6 +2632,10 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
+    const ctxMenu = document.getElementById('readerContextMenu');
+    if (ctxMenu && ctxMenu.classList.contains('show')) { hideContextMenu(); return; }
+    const qsm = document.getElementById('quoteShareModal');
+    if (qsm && qsm.style.display === 'flex') { closeQuoteShare(); return; }
     const overlay = document.getElementById('readerOverlay');
     if (overlay.style.display === 'block') { closeReader(); return; }
     const sm = document.getElementById('supportModal');
@@ -2490,18 +2648,134 @@ document.addEventListener('keydown', e => {
     if (fm && fm.style.display === 'flex') { closeFooterModal(); return; }
 });
 
-// ========== ЗАЩИТА ОТ КОПИРОВАНИЯ ==========
-document.addEventListener('copy', e => {
-    if (document.getElementById('readerOverlay').style.display === 'block') e.preventDefault();
-});
+// ========== КОНТЕКСТНОЕ МЕНЮ ЧИТАЛКИ ==========
+// Вместо блокировки копирования — свой список действий в стиле сайта:
+// копировать выделенное, выделить весь текст и поделиться цитатой в соцсетях.
+const ctxMenu = document.getElementById('readerContextMenu');
+
+function hideContextMenu() {
+    if (ctxMenu) ctxMenu.classList.remove('show');
+}
+
+function showContextMenu(x, y) {
+    if (!ctxMenu) return;
+    const hasSelection = (window.getSelection().toString().trim().length > 0);
+    ctxMenu.querySelectorAll('[data-action="copy"], [data-action="quote"]').forEach(item => {
+        item.style.display = hasSelection ? 'flex' : 'none';
+    });
+    ctxMenu.classList.add('show');
+    // сначала показываем, потом меряем размер и подгоняем, чтобы не вылезало за экран
+    const rect = ctxMenu.getBoundingClientRect();
+    const maxX = window.innerWidth - rect.width - 10;
+    const maxY = window.innerHeight - rect.height - 10;
+    ctxMenu.style.left = Math.max(10, Math.min(x, maxX)) + 'px';
+    ctxMenu.style.top = Math.max(10, Math.min(y, maxY)) + 'px';
+}
+
 document.addEventListener('contextmenu', e => {
-    if (document.getElementById('readerOverlay').style.display === 'block') e.preventDefault();
+    const overlay = document.getElementById('readerOverlay');
+    if (!overlay || overlay.style.display !== 'block') return;
+    if (!overlay.contains(e.target)) return;
+    e.preventDefault();
+    showContextMenu(e.clientX, e.clientY);
 });
-document.addEventListener('keydown', e => {
-    if (document.getElementById('readerOverlay').style.display !== 'block') return;
-    if ((e.ctrlKey || e.metaKey) && ['c','x','v','u'].includes(e.key)) e.preventDefault();
-    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) e.preventDefault();
+
+document.addEventListener('click', e => {
+    if (!ctxMenu || !ctxMenu.classList.contains('show')) return;
+    if (!ctxMenu.contains(e.target)) hideContextMenu();
 });
+document.getElementById('readerOverlay')?.addEventListener('scroll', hideContextMenu);
+window.addEventListener('resize', hideContextMenu);
+
+if (ctxMenu) {
+    ctxMenu.addEventListener('click', e => {
+        const item = e.target.closest('.context-menu-item');
+        if (!item) return;
+        const action = item.dataset.action;
+        hideContextMenu();
+        if (action === 'copy') copySelection();
+        else if (action === 'selectAll') selectAllReaderText();
+        else if (action === 'quote') quoteSelection();
+    });
+}
+
+function copySelection() {
+    const text = window.getSelection().toString().trim();
+    if (!text) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+            .then(() => showToast('Текст скопирован'))
+            .catch(() => showToast('Не удалось скопировать текст', 'error'));
+    } else {
+        showToast('Не удалось скопировать текст', 'error');
+    }
+}
+
+function selectAllReaderText() {
+    const body = document.getElementById('readerBody');
+    if (!body) return;
+    const range = document.createRange();
+    range.selectNodeContents(body);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+}
+
+function buildQuoteText() {
+    const text = window.getSelection().toString().trim();
+    if (!text) return null;
+    const attribution = currentStoryTitle ? `— «${currentStoryTitle}», Dark Stories` : '— Dark Stories';
+    return { quote: text, attribution };
+}
+
+function quoteSelection() {
+    const built = buildQuoteText();
+    if (!built) return;
+    const shareUrl = currentStoryId
+        ? location.origin + location.pathname + '?story=' + encodeURIComponent(currentStoryId)
+        : location.origin + location.pathname;
+    const fullText = `«${built.quote}»\n${built.attribution}`;
+
+    if (navigator.share) {
+        // На мобильных — сразу системное меню «Поделиться»: туда уже входят
+        // Telegram, VK (если установлены), WhatsApp и всё остальное.
+        navigator.share({ text: fullText, url: shareUrl }).catch(() => {});
+        return;
+    }
+
+    // На десктопе системного шеринга нет — показываем свой попап с ВК/Telegram/копированием.
+    openQuoteShareModal(built.quote, fullText, shareUrl);
+}
+
+let pendingQuoteShareText = '';
+function openQuoteShareModal(quoteOnly, fullText, shareUrl) {
+    const modal = document.getElementById('quoteShareModal');
+    const preview = document.getElementById('quoteSharePreview');
+    if (preview) preview.textContent = '«' + quoteOnly + '»';
+    pendingQuoteShareText = fullText;
+
+    const vkLink = document.getElementById('quoteShareVk');
+    if (vkLink) vkLink.href = 'https://vk.com/share.php?url=' + encodeURIComponent(shareUrl) + '&title=' + encodeURIComponent(fullText);
+
+    const tgLink = document.getElementById('quoteShareTelegram');
+    if (tgLink) tgLink.href = 'https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent(fullText);
+
+    if (modal) modal.style.display = 'flex';
+}
+function closeQuoteShare() {
+    const modal = document.getElementById('quoteShareModal');
+    if (modal) modal.style.display = 'none';
+}
+function copyQuoteToClipboard() {
+    if (!pendingQuoteShareText) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(pendingQuoteShareText)
+            .then(() => { showToast('Цитата скопирована'); closeQuoteShare(); })
+            .catch(() => showToast('Не удалось скопировать цитату', 'error'));
+    } else {
+        showToast('Не удалось скопировать цитату', 'error');
+    }
+}
 
 // ========== АНИМАЦИЯ КАРТОЧЕК НА МОБИЛЬНЫХ ==========
 function initCardAnimation() {
