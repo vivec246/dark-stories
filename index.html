@@ -4,7 +4,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <meta name="theme-color" content="#05070a">
-    <meta name="description" content="Тёмные истории от Дмитрия Ланцева — рассказы и статьи в жанре мистика и тёмное фэнтези">
+    <meta name="description" content="Тёмные истории от Дмитрия Ланцева — рассказы и статьи в жанре мистика и тёмное фэнтези" id="metaDescription">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Dark Stories">
+    <meta property="og:title" content="Dark Stories — Дмитрий Ланцев" id="ogTitle">
+    <meta property="og:description" content="Тёмные истории от Дмитрия Ланцева — рассказы и статьи в жанре мистика и тёмное фэнтези" id="ogDescription">
+    <meta property="og:image" content="cap/header_1.jpg" id="ogImage">
+    <meta property="og:url" content="" id="ogUrl">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Dark Stories — Дмитрий Ланцев" id="twitterTitle">
+    <meta name="twitter:description" content="Тёмные истории от Дмитрия Ланцева — рассказы и статьи в жанре мистика и тёмное фэнтези" id="twitterDescription">
+    <meta name="twitter:image" content="cap/header_1.jpg" id="twitterImage">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1786,7 +1796,7 @@ function showToast(message, type = 'info', duration = 3200) {
 
 // ========== PWA ==========
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register('sw.js')
         .then(reg => {})
         .catch(err => {});
 }
@@ -1938,6 +1948,8 @@ function cardHTML(item) {
                 <img class="card-image"
                      src="covers/${item.cover}"
                      alt="${item.title}"
+                     loading="lazy"
+                     decoding="async"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="card-image-fallback" style="display:none;">
                     <span>${item.genre}</span>
@@ -2005,7 +2017,7 @@ function recentCardHTML(item) {
     return `
         <div class="recent-card" onclick="openReader('${item.path}', '${escTitle}')" role="button" tabindex="0" aria-label="Читать: ${safeTitle}">
             <div class="thumb">
-                <img src="covers/${item.cover}" alt="${item.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <img src="covers/${item.cover}" alt="${item.title}" loading="lazy" decoding="async" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="fallback" style="display:none;">${item.genre}</div>
             </div>
             <div class="recent-card-title">${item.shortTitle}</div>
@@ -2034,12 +2046,12 @@ let searchIndexReady = false;
 
 async function buildSearchIndex() {
     const allItems = [...storiesData, ...articlesData];
-    for (const item of allItems) {
+    await Promise.all(allItems.map(async item => {
         try {
             const content = await fetchWithCache(item.path);
             searchIndex.set(item.path, { ...item, content });
         } catch(e) {}
-    }
+    }));
     searchIndexReady = true;
 }
 
@@ -2203,6 +2215,50 @@ function handleBackButton() {
     }
 }
 
+// ========== МЕТА-ТЕГИ СТРАНИЦЫ (title, OG, Twitter) ==========
+// Важно: это ТОЛЬКО косметика для вкладки браузера и ботов, которые
+// выполняют JS (например, Google). Боты превью Telegram/VK/др. соцсетей
+// JavaScript не исполняют и читают лишь исходный HTML — им эти изменения
+// не видны, поэтому превью при пересылке ссылки останется общим для сайта.
+// Полноценное решение потребовало бы отдельных статических страниц на
+// каждый рассказ, сгенерированных заранее (это отдельная более крупная задача).
+const DEFAULT_META = {
+    title: 'Dark Stories — Дмитрий Ланцев',
+    description: 'Тёмные истории от Дмитрия Ланцева — рассказы и статьи в жанре мистика и тёмное фэнтези',
+    image: 'cap/header_1.jpg'
+};
+
+function absUrl(relativePath) {
+    try { return new URL(relativePath, document.baseURI).href; }
+    catch(e) { return relativePath; }
+}
+
+function setMetaTag(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('content', value);
+}
+
+function updatePageMeta({ title, description, image, url }) {
+    document.title = title;
+    setMetaTag('metaDescription', description);
+    setMetaTag('ogTitle', title);
+    setMetaTag('ogDescription', description);
+    setMetaTag('ogImage', image);
+    setMetaTag('ogUrl', url || location.href);
+    setMetaTag('twitterTitle', title);
+    setMetaTag('twitterDescription', description);
+    setMetaTag('twitterImage', image);
+}
+
+function resetPageMeta() {
+    updatePageMeta({
+        title: DEFAULT_META.title,
+        description: DEFAULT_META.description,
+        image: absUrl(DEFAULT_META.image),
+        url: absUrl(location.pathname)
+    });
+}
+
 async function openReader(path, title) {
     currentStoryId = path;
     currentStoryTitle = title;
@@ -2232,6 +2288,16 @@ async function openReader(path, title) {
         readerBody.innerHTML = '<h1>' + escapeHtml(title) + '</h1>' + htmlContent;
         applySavedFontSize();
         readerBody.querySelectorAll('h2, h3').forEach(h => { if (!h.id) h.id = generateSecureId(); });
+        readerBody.querySelectorAll('img').forEach(img => { img.loading = 'lazy'; img.decoding = 'async'; });
+
+        const allItems = [...storiesData, ...articlesData];
+        const item = allItems.find(i => i.path === path);
+        updatePageMeta({
+            title: title + ' — Dark Stories',
+            description: item ? item.desc : DEFAULT_META.description,
+            image: item ? absUrl('covers/' + item.cover) : absUrl(DEFAULT_META.image),
+            url: absUrl(location.pathname + '?story=' + encodeURIComponent(path))
+        });
 
         initProgressBar();
         if (progBar) progBar.style.display = 'block';
@@ -2261,6 +2327,7 @@ function closeReader() {
     controlsVisible = true;
     if (controls) { controls.style.opacity = '1'; controls.style.pointerEvents = 'auto'; }
     if (readerHistoryState) { history.replaceState(readerHistoryState, '', location.href); readerHistoryState = null; }
+    resetPageMeta();
 }
 
 function shareCurrentStory() {
@@ -2270,13 +2337,7 @@ function shareCurrentStory() {
         navigator.share({ title: currentStoryTitle, url: shareUrl }).catch(() => {});
         return;
     }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(shareUrl)
-            .then(() => showToast('Ссылка скопирована — можно отправлять'))
-            .catch(() => showToast('Не удалось скопировать ссылку', 'error'));
-    } else {
-        showToast('Не удалось скопировать ссылку', 'error');
-    }
+    copyTextToClipboard(shareUrl, 'Ссылка скопирована — можно отправлять', 'Не удалось скопировать ссылку');
 }
 
 function openSharedStoryFromUrl() {
@@ -2379,7 +2440,7 @@ function showSupportModal() {
 }
 function closeSupportModal() { document.getElementById('supportModal').style.display = 'none'; }
 function selectAmount(amount) { closeSupportModal(); setTimeout(() => showToast('Спасибо! Номер карты: 2202 2023 5788 7805'), 300); }
-function copyCardNumber() { navigator.clipboard.writeText('2202 2023 5788 7805').then(() => showToast('Скопировано! Спасибо за поддержку ❤️')); }
+function copyCardNumber() { copyTextToClipboard('2202 2023 5788 7805', 'Скопировано! Спасибо за поддержку ❤️', 'Не удалось скопировать номер карты'); }
 
 // ========== ФУТЕР ==========
 const footerData = {
@@ -2531,14 +2592,14 @@ function scrollToNav() {
 // ========== ПРОВЕРКА ФАЙЛОВ ==========
 async function checkAllCards() {
     const allItems = [...storiesData, ...articlesData];
-    for (const item of allItems) {
+    await Promise.all(allItems.map(async item => {
         try {
             const r = await fetch(item.path, { method: 'HEAD' });
             if (!r.ok) throw new Error();
         } catch {
             document.querySelectorAll(`.card[data-file="${item.path}"]`).forEach(card => card.classList.add('missing'));
         }
-    }
+    }));
 }
 
 // ========== УВЕДОМЛЕНИЯ О НОВЫХ РАССКАЗАХ ==========
@@ -2652,6 +2713,7 @@ document.addEventListener('keydown', e => {
 // Вместо блокировки копирования — свой список действий в стиле сайта:
 // копировать выделенное, выделить весь текст и поделиться цитатой в соцсетях.
 const ctxMenu = document.getElementById('readerContextMenu');
+let capturedSelectionText = '';
 
 function hideContextMenu() {
     if (ctxMenu) ctxMenu.classList.remove('show');
@@ -2659,7 +2721,7 @@ function hideContextMenu() {
 
 function showContextMenu(x, y) {
     if (!ctxMenu) return;
-    const hasSelection = (window.getSelection().toString().trim().length > 0);
+    const hasSelection = capturedSelectionText.length > 0;
     ctxMenu.querySelectorAll('[data-action="copy"], [data-action="quote"]').forEach(item => {
         item.style.display = hasSelection ? 'flex' : 'none';
     });
@@ -2677,6 +2739,10 @@ document.addEventListener('contextmenu', e => {
     if (!overlay || overlay.style.display !== 'block') return;
     if (!overlay.contains(e.target)) return;
     e.preventDefault();
+    // Важно: сохраняем выделение здесь, до любых кликов — иначе клик по пункту
+    // меню (это клик мимо выделенного текста) сам снимет выделение в браузере,
+    // и к моменту обработки клика window.getSelection() будет уже пустым.
+    capturedSelectionText = window.getSelection().toString().trim();
     showContextMenu(e.clientX, e.clientY);
 });
 
@@ -2699,16 +2765,45 @@ if (ctxMenu) {
     });
 }
 
-function copySelection() {
-    const text = window.getSelection().toString().trim();
-    if (!text) return;
+// Резервный способ копирования, если navigator.clipboard недоступен
+// (например, страница открыта не по HTTPS).
+function legacyCopyText(text) {
+    try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+    } catch(e) {
+        return false;
+    }
+}
+
+function copyTextToClipboard(text, successMessage, errorMessage) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text)
-            .then(() => showToast('Текст скопирован'))
-            .catch(() => showToast('Не удалось скопировать текст', 'error'));
+            .then(() => showToast(successMessage))
+            .catch(() => {
+                if (legacyCopyText(text)) showToast(successMessage);
+                else showToast(errorMessage, 'error');
+            });
+    } else if (legacyCopyText(text)) {
+        showToast(successMessage);
     } else {
-        showToast('Не удалось скопировать текст', 'error');
+        showToast(errorMessage, 'error');
     }
+}
+
+function copySelection() {
+    const text = capturedSelectionText;
+    if (!text) return;
+    copyTextToClipboard(text, 'Текст скопирован', 'Не удалось скопировать текст');
 }
 
 function selectAllReaderText() {
@@ -2722,7 +2817,7 @@ function selectAllReaderText() {
 }
 
 function buildQuoteText() {
-    const text = window.getSelection().toString().trim();
+    const text = capturedSelectionText;
     if (!text) return null;
     const attribution = currentStoryTitle ? `— «${currentStoryTitle}», Dark Stories` : '— Dark Stories';
     return { quote: text, attribution };
@@ -2768,28 +2863,41 @@ function closeQuoteShare() {
 }
 function copyQuoteToClipboard() {
     if (!pendingQuoteShareText) return;
+    const onSuccess = () => { showToast('Цитата скопирована'); closeQuoteShare(); };
+    const onError = () => showToast('Не удалось скопировать цитату', 'error');
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(pendingQuoteShareText)
-            .then(() => { showToast('Цитата скопирована'); closeQuoteShare(); })
-            .catch(() => showToast('Не удалось скопировать цитату', 'error'));
+            .then(onSuccess)
+            .catch(() => { if (legacyCopyText(pendingQuoteShareText)) onSuccess(); else onError(); });
+    } else if (legacyCopyText(pendingQuoteShareText)) {
+        onSuccess();
     } else {
-        showToast('Не удалось скопировать цитату', 'error');
+        onError();
     }
 }
 
 // ========== АНИМАЦИЯ КАРТОЧЕК НА МОБИЛЬНЫХ ==========
+let cardAnimationObserver = null;
 function initCardAnimation() {
+    // При каждом переключении на вкладку «Избранное» эта функция вызывается заново
+    // (см. setActiveTab) и раньше создавала новый IntersectionObserver, не отключая
+    // предыдущий — они копились в памяти. Отключаем старый перед созданием нового.
+    if (cardAnimationObserver) {
+        cardAnimationObserver.disconnect();
+        cardAnimationObserver = null;
+    }
     if (window.innerWidth > 768) return;
-    const observer = new IntersectionObserver(entries => {
+    cardAnimationObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             entry.target.classList.toggle('card-visible', entry.isIntersecting);
         });
     }, { threshold: 0.75 });
-    document.querySelectorAll('.card').forEach(card => observer.observe(card));
+    document.querySelectorAll('.card').forEach(card => cardAnimationObserver.observe(card));
 }
 
 // ========== ИНИЦИАЛИЗАЦИЯ ==========
 document.addEventListener('DOMContentLoaded', async () => {
+    resetPageMeta();
     renderCards('storiesGrid', storiesData);
     renderCards('articlesGrid', articlesData);
     renderRecentShelf();
