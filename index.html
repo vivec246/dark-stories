@@ -279,25 +279,6 @@
             width: 100%;
             position: relative;
         }
-        .notify-toggle {
-            flex-shrink: 0;
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(136,170,221,0.18);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent);
-            opacity: 0.6;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .notify-toggle .icon { width: 16px; height: 16px; }
-        .notify-toggle:hover { opacity: 1; border-color: rgba(136,170,221,0.4); }
-        .notify-toggle.active { opacity: 1; border-color: var(--accent); background: rgba(136,170,221,0.12); }
-        .notify-toggle.active .icon path:last-child { fill: currentColor; }
         .tab-link {
             font-family: 'Montserrat', sans-serif;
             font-size: 7px;
@@ -990,6 +971,22 @@
         .reader-body h3 { font-size: 1.3em; margin: 1.5em 0 0.5em; }
         .reader-body p { margin-bottom: 1.2em; line-height: 1.85; color: var(--text-light); }
         .reader-body img { max-width: 100%; height: auto; display: block; margin: 20px auto; border-radius: 8px; }
+        .reader-body hr { border: none; border-top: 1px solid rgba(136,170,221,0.15); margin: 2em 0; }
+
+        /* ========== ЛЕНТА «НОВОЕ» ========== */
+        .updates-panel {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 50px 40px;
+            background: rgba(10,14,23,0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(136,170,221,0.15);
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        @media (max-width: 768px) {
+            .updates-panel { padding: 34px 22px; margin: 20px auto; border-radius: 18px; }
+        }
 
         .reader-content:not(.night-mode) {
             background: #fdfcf8;
@@ -1593,6 +1590,10 @@
 <!-- ========== НАВИГАЦИЯ ========== -->
 <nav class="tabs">
     <div class="nav-links" role="tablist">
+        <div class="tab-link" data-tab="updates" role="tab" tabindex="0" aria-selected="false">
+            <svg class="icon icon-stroke" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>Новое</span>
+        </div>
         <div class="tab-link" data-tab="shelf" role="tab" tabindex="0" aria-selected="false">
             <svg class="icon icon-stroke" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             <span>Избранное</span>
@@ -1623,13 +1624,22 @@
             </div>
             <div id="searchResults" class="search-results"></div>
         </div>
-        <button class="notify-toggle" id="notifyToggle" title="Уведомления о новых рассказах" aria-label="Уведомления о новых рассказах">
-            <svg class="icon icon-stroke" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0112 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M9.5 20a2.5 2.5 0 005 0"/></svg>
-        </button>
     </div>
 </nav>
 
 <main style="max-width:1400px; margin:0 auto; padding:0 20px; width:100%; flex:1 0 auto;">
+    <!-- ========== НОВОЕ ========== -->
+    <section id="updates" class="content-section" style="display:none;">
+        <div class="updates-panel">
+            <div id="updatesContent" class="reader-body">
+                <div style="text-align:center; padding:60px 20px; color:var(--accent);">
+                    <svg class="icon icon-stroke icon-spin" viewBox="0 0 24 24" style="width:2em;height:2em;"><circle cx="12" cy="12" r="9" stroke-opacity="0.25"/><path d="M21 12a9 9 0 00-9-9"/></svg>
+                    <p style="margin-top:16px; opacity:0.5; font-size:0.85em; letter-spacing:2px;">ЗАГРУЗКА</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- ========== ПОЛКА ========== -->
     <section id="shelf" class="content-section" style="display:none;">
         <div class="content-grid" id="shelfGrid"></div>
@@ -2138,7 +2148,7 @@ function setActiveTab(tabId) {
         tab.classList.toggle('active', isActive);
         tab.setAttribute('aria-selected', String(isActive));
     });
-    ['shelf','stories','articles','support','contact'].forEach(id => {
+    ['updates','shelf','stories','articles','support','contact'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = id === tabId ? 'block' : 'none';
     });
@@ -2146,8 +2156,28 @@ function setActiveTab(tabId) {
         renderShelf();
         initCardAnimation();
     }
+    if (tabId === 'updates') {
+        loadUpdatesFeed();
+    }
     const searchInput = document.getElementById('searchInput');
     if (searchInput) searchInput.value = '';
+}
+
+// ========== ЛЕНТА «НОВОЕ» ==========
+// Текст ленты редактируется в отдельном файле updates.md — просто добавляйте
+// новые записи сверху файла, ничего в коде сайта менять не нужно.
+let updatesLoaded = false;
+async function loadUpdatesFeed() {
+    if (updatesLoaded) return;
+    const container = document.getElementById('updatesContent');
+    if (!container) return;
+    try {
+        const content = await fetchWithCache('updates.md');
+        container.innerHTML = await marked.parse(content);
+        updatesLoaded = true;
+    } catch(e) {
+        container.innerHTML = '<div style="text-align:center; padding:60px 20px;"><svg class="icon icon-stroke" viewBox="0 0 24 24" style="width:2em;height:2em;color:var(--accent);"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12.01" y2="16.5"/></svg><p style="margin-top:16px; opacity:0.6;">Не удалось загрузить ленту обновлений</p></div>';
+    }
 }
 
 // ========== ПРОГРЕСС-БАР ==========
@@ -2602,73 +2632,6 @@ async function checkAllCards() {
     }));
 }
 
-// ========== УВЕДОМЛЕНИЯ О НОВЫХ РАССКАЗАХ ==========
-const notifyToggle = document.getElementById('notifyToggle');
-
-function isNotifyEnabled() {
-    return safeStorageGet('dim_notify_enabled', null) === 'true'
-        && typeof Notification !== 'undefined' && Notification.permission === 'granted';
-}
-function updateNotifyToggleUI() {
-    if (notifyToggle) notifyToggle.classList.toggle('active', isNotifyEnabled());
-}
-function itemsSnapshot() {
-    return [...storiesData, ...articlesData].map(item => item.path);
-}
-async function showLocalNotification(title, body) {
-    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
-    if ('serviceWorker' in navigator) {
-        try {
-            const reg = await navigator.serviceWorker.ready;
-            reg.showNotification(title, { body, icon: 'favicon-32x32.png' });
-            return;
-        } catch(e) { /* используем Notification ниже как запасной вариант */ }
-    }
-    new Notification(title, { body, icon: 'favicon-32x32.png' });
-}
-function checkForNewStories() {
-    if (!isNotifyEnabled()) return;
-    const previous = safeJSONGet('dim_notify_snapshot', []);
-
-    const current = itemsSnapshot();
-    if (previous.length) {
-        const allItems = [...storiesData, ...articlesData];
-        const newPaths = current.filter(path => !previous.includes(path));
-        newPaths.forEach(path => {
-            const item = allItems.find(i => i.path === path);
-            if (item) showLocalNotification('Dark Stories', 'Новое: ' + item.title);
-        });
-    }
-    safeStorageSet('dim_notify_snapshot', JSON.stringify(current));
-}
-
-if (notifyToggle) {
-    notifyToggle.addEventListener('click', async () => {
-        if (typeof Notification === 'undefined') {
-            showToast('Уведомления не поддерживаются в этом браузере', 'error');
-            return;
-        }
-        if (isNotifyEnabled()) {
-            safeStorageSet('dim_notify_enabled', 'false');
-            updateNotifyToggleUI();
-            showToast('Уведомления выключены');
-            return;
-        }
-        const permission = Notification.permission === 'granted'
-            ? 'granted'
-            : await Notification.requestPermission();
-
-        if (permission === 'granted') {
-            safeStorageSet('dim_notify_enabled', 'true');
-            safeStorageSet('dim_notify_snapshot', JSON.stringify(itemsSnapshot()));
-            updateNotifyToggleUI();
-            showToast('Уведомления о новых рассказах включены ✓');
-        } else {
-            showToast('Уведомления заблокированы в настройках браузера', 'error');
-        }
-    });
-}
-
 // ========== КЛАВИАТУРНАЯ АКТИВАЦИЯ ЭЛЕМЕНТОВ С role="button"/role="tab" ==========
 // Такие элементы (карточки, звёздочка избранного, вкладки навигации, ссылки в футере)
 // сделаны на div/span ради вёрстки, а не на <button>, поэтому браузер не даёт им
@@ -2911,9 +2874,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupSearch();
     checkAllCards();
     initCardAnimation();
-
-    updateNotifyToggleUI();
-    checkForNewStories();
 
     openSharedStoryFromUrl();
 });
