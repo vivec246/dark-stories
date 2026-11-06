@@ -43,6 +43,10 @@ PAGES['/about'] = { title: 'О сайте — ' + SITE.name, render: function ()
     '<p>Email: <a class="l" href="mailto:' + SITE.email + '">' + SITE.email + '</a></p>' +
     '<p>Telegram: <a class="l" href="' + SITE.telegram + '">' + SITE.telegramHandle + '</a></p></article>';
 }};
+PAGES['/author'] = { title: 'Об авторе — ' + SITE.name, desc: 'Дмитрий Ланцев: пишу о ведьмаках, космических аномалиях и людях, которые пытаются остаться людьми.', render: function () {
+  return '<article class="doc">' + docCloseBtn() + '<h1>Об авторе</h1><p><strong>Я Дмитрий Ланцев.</strong></p>' +
+    '<p>Родился и живу в Сибири. Пишу о ведьмаках, космических аномалиях и людях, которые пытаются остаться людьми. Здесь, на «Dark Stories», я собираю свои миры, чтобы поделиться с вами, чтобы они наконец-то нашли своего читателя.</p></article>';
+}};
 PAGES['/policy'] = { title: 'Политика — ' + SITE.name, render: function () {
   return '<article class="doc">' + docCloseBtn() + '<h1>Политика конфиденциальности</h1><p>Сайт ' + SITE.name + ' уважает вашу конфиденциальность.</p>' +
     '<p><strong>1.</strong> Часть материалов предназначена для читателей старше 16 или 18 лет — это указано на карточке. Продолжая читать, вы подтверждаете возраст.</p>' +

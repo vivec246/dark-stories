@@ -27,7 +27,7 @@ function parseMd(md) {
   return blocks;
 }
 function stripMd(md) {
-  return md.replace(/\[страх\]\s*/gi, '').replace(/^#{1,3}\s+/gm, '').replace(/^>\s+/gm, '').replace(/[*_]{1,2}([^*_]+)[*_]{1,2}/g, '$1').replace(/<\/?center>/gi, '').replace(/^---$/gm, '').replace(/\s+/g, ' ').trim();
+  return md.replace(/^#{1,3}\s+/gm, '').replace(/^>\s+/gm, '').replace(/[*_]{1,2}([^*_]+)[*_]{1,2}/g, '$1').replace(/<\/?center>/gi, '').replace(/^---$/gm, '').replace(/\s+/g, ' ').trim();
 }
 function excerpt(text, q, radius) {
   radius = radius || 72;
@@ -61,12 +61,7 @@ function mdHtml(title, blocks, q) {
     else if (b.t === 'h3') h += '<h3 id="' + esc(b.id) + '"' + (b.center ? ' class="center"' : '') + '>' + rich(b.text, q) + '</h3>';
     else if (b.t === 'bq') h += '<blockquote>' + rich(b.text, q) + '</blockquote>';
     else if (b.t === 'ul' || b.t === 'ol') h += '<' + b.t + '>' + b.items.map(function (i) { return '<li>' + rich(i, q) + '</li>'; }).join('') + '</' + b.t + '>';
-    else {
-      /* [страх] в начале абзаца — «страшное место»: в режиме страха читалка в этот момент темнеет */
-      var fear = /^\[страх\]\s*/i.test(b.text), tx = fear ? b.text.replace(/^\[страх\]\s*/i, '') : b.text;
-      var cls = (b.center ? 'center' : '') + (fear ? ' fear' : '');
-      h += '<p' + (cls.trim() ? ' class="' + cls.trim() + '"' : '') + '>' + rich(tx, q) + '</p>';
-    }
+    else h += '<p' + (b.center ? ' class="center"' : '') + '>' + rich(b.text, q) + '</p>';
   });
   return h + '</div>';
 }

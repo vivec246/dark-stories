@@ -42,7 +42,7 @@ function bookCardHtml(w) {
           '<div class="card-footer-actions"><button type="button" class="btn-desc" data-desc>Описание</button>' +
           '<a class="btn-read" href="' + href + '">' + (pct >= 1 && pct < 96 ? 'Продолжить' : 'Читать') + '</a></div></div></div>' +
       '</div>' +
-      '<div class="bc-face bc-spine"><div class="bc-spine-bg" style="' + bg + '"></div><div class="bc-title-wrap"><div class="bc-title">' + esc(w.shortTitle) + '</div></div><span class="bc-emblem">DS</span></div>' +
+      '<div class="bc-face bc-spine"><div class="bc-spine-bg" style="' + bg + '"></div><div class="bc-title-wrap"><div class="bc-title">' + esc(w.shortTitle) + '</div></div>' + emblemHtml('bc-emblem') + '</div>' +
       '<div class="bc-face bc-right"></div><div class="bc-face bc-top-f"></div><div class="bc-face bc-bottom-f"></div><div class="bc-face bc-back">' +
         '<div class="bc-back-bg" style="' + bg + '"></div>' +
         '<div class="bc-back-in"><div class="bk-genre">' + esc(w.genre) + '</div><h3>' + esc(w.title) + '</h3><div class="bc-rule"></div>' +
@@ -59,18 +59,34 @@ function paperHtml(w) {
   var href = '#/read/' + w.slug;
   var pct = Math.min(100, Math.round(Store.pct(w.slug)));
   var text = String(w.description || '');
+  var shortInfo = pct >= 1 ? pct + '%' : (w.minutes ? esc(w.minutes) + ' мин' : '');
+  var backInfo = [esc(w.year), esc(w.age), w.minutes ? esc(w.minutes) + ' мин чтения' : '', pct >= 1 ? 'прочитано ' + pct + '%' : ''].filter(Boolean).join(' · ');
   return '<article class="paper" data-href="' + href + '" tabindex="0" aria-label="Читать: ' + esc(w.title) + '">' +
+    '<div class="pp-flip">' +
+    /* лицевая сторона */
     '<div class="pp-sheet">' +
       '<div class="pp-meta"><span>Выпуск ' + esc(w.year) + '</span><span class="pp-genre">' + esc(w.genre) + '</span></div>' +
       '<h3 class="pp-mast">' + esc(w.title) + '</h3>' +
       '<div class="pp-rule"></div>' +
       '<figure class="pp-photo"><img src="' + esc(w.cover) + '" alt="" loading="lazy" decoding="async" onerror="coverFail(this)"><div class="pp-fallback" style="display:none"></div><i class="pp-tint"></i><i class="pp-dots"></i></figure>' +
-      '<p class="pp-body">' + esc(text) + '</p>' +
       '<div class="pp-foot"><span class="pp-age">' + esc(w.age) + '</span>' +
-        '<span class="pp-time">' + (pct >= 1 ? 'прочитано ' + pct + '%' : (w.minutes ? esc(w.minutes) + ' мин. чтения' : '')) + '</span>' +
+        '<span class="pp-time">' + shortInfo + '</span>' +
+        '<button type="button" class="pp-desc-btn" data-desc>Описание</button>' +
         '<a class="pp-read" href="' + href + '">Читать →</a></div>' +
+    '</div>' +
+    /* оборот: полное описание */
+    '<div class="pp-sheet pp-back">' +
+      '<div class="pp-meta"><span>Выпуск ' + esc(w.year) + '</span><span class="pp-genre">' + esc(w.genre) + '</span></div>' +
+      '<h3 class="pp-mast">' + esc(w.title) + '</h3>' +
+      '<div class="pp-rule"></div>' +
+      '<div class="pp-desc-full">' + esc(text) + '</div>' +
+      '<div class="pp-info">' + backInfo + '</div>' +
+      '<div class="pp-foot"><button type="button" class="pp-desc-btn" data-desc>К лицевой</button>' +
+        '<a class="pp-read" href="' + href + '">Читать →</a></div>' +
+    '</div>' +
     '</div></article>';
 }
+
 function coverFail(img) {
   img.style.display = 'none';
   if (img.nextElementSibling) img.nextElementSibling.style.display = 'flex';
@@ -78,6 +94,11 @@ function coverFail(img) {
 function gridHtml(items) {
   if (!items.length) return '<p class="empty">Пока пусто — нажмите на звезду на карточке, чтобы добавить рассказ или статью.</p>';
   return '<div class="grid">' + items.map(function (w) { return w.kind === 'article' ? paperHtml(w) : bookCardHtml(w); }).join('') + '</div>';
+}
+
+/* знак «DS» в кружке: буквы поставлены по высоте заглавных (а не по строке текста), поэтому стоят точно по центру при любом шрифте */
+function emblemHtml(cls) {
+  return '<span class="' + cls + '"><svg viewBox="0 0 100 100" aria-hidden="true"><text x="51.1" y="64.4" font-size="40" letter-spacing="2">DS</text></svg></span>';
 }
 
 /* ПОЛКА: книги стоят корешком к читателю, при наведении поворачиваются обложкой. */
@@ -97,7 +118,7 @@ function bookHtml(w) {
         (pct >= 1 && pct < 100 ? '<div class="bk-ribbon"></div>' : '') +
         '<span class="bk-year">' + esc(w.year) + '</span><span class="bk-orn"></span>' +
         '<div class="bk-title-wrap"><div class="bk-title" style="font-size:' + fs + 'px">' + esc(w.shortTitle) + '</div></div>' +
-        '<span class="bk-orn"></span><span class="bk-emblem">DS</span>' +
+        '<span class="bk-orn"></span>' + emblemHtml('bk-emblem') +
       '</div>' +
       /* обложка */
       '<div class="bk-face bk-front">' +

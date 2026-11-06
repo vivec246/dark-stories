@@ -1,4 +1,4 @@
-/* ЧИТАЛКА: страница текста, прогресс и время до конца, закладки, оглавление, настройки чтения (тема, шрифт, ширина, интервал), режим страха,
+/* ЧИТАЛКА: страница текста, прогресс и время до конца, закладки, оглавление, настройки чтения (тема, шрифт, ширина, интервал),
    анимация открытия книги и газеты, следующая книга в конце.
    Кнопки управления — из версии 4. Меню правой кнопки и цитаты — в reader-menu.js. */
 
@@ -8,13 +8,11 @@ var controlsOn = true;
 var SPINNER = '<svg class="ico spin" viewBox="0 0 24 24" style="width:2em;height:2em" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke-opacity="0.25"/><path d="M21 12a9 9 0 00-9-9"/></svg>';
 var TRASH = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
 
-/* темы, шрифт, ширина строки, интервал, режим страха */
+/* темы, шрифт, ширина строки, интервал */
 var THEMES = ['night', 'day', 'candle'];
 var THEME_NAMES = { night: 'Ночь', day: 'День', candle: 'Свеча' };
-if (!ICONS.sliders) ICONS.sliders = '<line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/>';
 
 function prefIsOn(key, val) {
-  if (key === 'readerFear') return (Store.s.readerFear ? 'on' : 'off') === val;
   return Store.s[key] === val;
 }
 function chipsHtml(key, opts) {
@@ -22,14 +20,13 @@ function chipsHtml(key, opts) {
     return '<button type="button" class="chip' + (prefIsOn(key, o[0]) ? ' on' : '') + '" data-pref="' + key + '" data-val="' + o[0] + '">' + o[1] + '</button>';
   }).join('');
 }
-function settingsHtml() {
-  return '<div class="spop" id="spop" hidden>' +
-    '<div class="sp-sec"><div class="sp-t">Тема</div><div class="sp-chips">' + chipsHtml('readerTheme', [['night', 'Ночь'], ['day', 'День'], ['candle', 'Свеча']]) + '</div></div>' +
+/* настройки текста под кнопкой «T»: размер, шрифт, ширина строки, интервал */
+function textPanelHtml() {
+  return '<div class="spop" id="fontpop" hidden>' +
+    '<div class="sp-sec"><div class="sp-t">Размер</div><input type="range" id="fontrange" min="0.8" max="2.0" step="0.1" value="' + Store.s.fontSize + '" aria-label="Размер шрифта"></div>' +
     '<div class="sp-sec"><div class="sp-t">Шрифт</div><div class="sp-chips">' + chipsHtml('readerFont', [['sans', 'Без засечек'], ['serif', 'С засечками']]) + '</div></div>' +
-    '<div class="sp-sec"><div class="sp-t">Ширина строки</div><div class="sp-chips">' + chipsHtml('readerWidth', [['narrow', 'Узко'], ['normal', 'Средне'], ['wide', 'Широко']]) + '</div></div>' +
+    '<div class="sp-sec sp-desk"><div class="sp-t">Ширина строки</div><div class="sp-chips">' + chipsHtml('readerWidth', [['narrow', 'Узко'], ['normal', 'Средне'], ['wide', 'Широко']]) + '</div></div>' +
     '<div class="sp-sec"><div class="sp-t">Интервал</div><div class="sp-chips">' + chipsHtml('readerLead', [['tight', 'Плотно'], ['normal', 'Обычно'], ['loose', 'Свободно']]) + '</div></div>' +
-    '<div class="sp-sec"><div class="sp-t">Режим страха</div><div class="sp-chips">' + chipsHtml('readerFear', [['off', 'Выкл'], ['on', 'Вкл']]) + '</div>' +
-    '<p class="sp-note" id="fearnote"></p></div>' +
     '<p class="sp-keys">Клавиши: ← → листать · + − размер · T тема · F без кнопок</p></div>';
 }
 function readerClass() {
@@ -45,11 +42,9 @@ function readerShell(w) {
     '<button type="button" class="btn control" data-act="close" aria-label="Закрыть читалку">' + icon('back') + '</button>' +
     '<button type="button" class="btn control" data-act="theme" aria-label="Сменить тему">' + icon('moon') + '</button>' +
     '<button type="button" class="btn control" data-act="bookmarks" aria-label="Закладки">' + icon('bookmark') + '</button>' +
-    '<div class="fontwrap"><div class="fontpop" id="fontpop" hidden><input type="range" id="fontrange" min="0.8" max="2.0" step="0.1" value="' + S.fontSize + '" aria-label="Размер шрифта"></div>' +
-    '<button type="button" class="btn control" data-act="font" aria-label="Размер шрифта">' + icon('type') + '</button></div>' +
-    '<button type="button" class="btn control" data-act="settings" aria-label="Настройки чтения">' + icon('sliders') + '</button>' +
+    '<button type="button" class="btn control" data-act="font" aria-label="Настройки текста">' + icon('type') + '</button>' +
     '<button type="button" class="btn control" data-act="toc" aria-label="Содержание">' + icon('list') + '</button></div>' +
-    settingsHtml() +
+    textPanelHtml() +
     '<div class="rtime" id="rtime" aria-live="off"></div>' +
     '<button type="button" class="btn control share" id="rshare" data-act="share" aria-label="Поделиться">' + icon('share') + '</button>' +
     '<div class="rcontent" id="rcontent"><div id="rart"><div class="loadmsg">' + SPINNER + '<p>ЗАГРУЗКА</p></div></div></div></div>';
@@ -65,14 +60,12 @@ function applyReaderPrefs() {
   rd.setAttribute('data-font', S.readerFont);
   rd.setAttribute('data-width', S.readerWidth);
   rd.setAttribute('data-lead', S.readerLead);
-  $$('#spop .chip').forEach(function (c) { c.classList.toggle('on', prefIsOn(c.getAttribute('data-pref'), c.getAttribute('data-val'))); });
+  $$('#fontpop .chip').forEach(function (c) { c.classList.toggle('on', prefIsOn(c.getAttribute('data-pref'), c.getAttribute('data-val'))); });
   updateProgressBar();
 }
 function setReaderPref(k, v) {
-  if (k === 'readerFear') v = (v === 'on');
   Store.setPref(k, v);
   applyReaderPrefs();
-  if (k === 'readerFear') fearStart();
 }
 function cycleTheme() {
   var n = THEMES[(THEMES.indexOf(Store.s.readerTheme) + 1) % THEMES.length];
@@ -83,27 +76,6 @@ function readerFontStep(d) {
   var v = Math.max(0.8, Math.min(2.0, Math.round((Store.s.fontSize + d) * 10) / 10));
   Store.setFont(v); applyFont();
   var r = $('#fontrange'); if (r) r.value = v;
-}
-
-/* РЕЖИМ СТРАХА: когда на экране абзац с меткой [страх], свет в читалке гаснет, по краям сгущается тьма */
-var fearObs = null, fearActive = [];
-function fearStop() {
-  if (fearObs) { fearObs.disconnect(); fearObs = null; }
-  fearActive = [];
-  var rd = $('#reader'); if (rd) rd.classList.remove('fear-on');
-}
-function fearStart() {
-  fearStop();
-  var rd = $('#reader');
-  if (!rd || !Store.s.readerFear || !window.IntersectionObserver) return;
-  fearObs = new IntersectionObserver(function (es) {
-    es.forEach(function (e) {
-      var i = fearActive.indexOf(e.target);
-      if (e.isIntersecting) { if (i < 0) fearActive.push(e.target); } else if (i >= 0) fearActive.splice(i, 1);
-    });
-    rd.classList.toggle('fear-on', fearActive.length > 0);
-  }, { rootMargin: '-35% 0px -35% 0px' });
-  $$('#rart p.fear').forEach(function (p) { fearObs.observe(p); });
 }
 
 /* ОТКРЫТИЕ: книга раскрывает обложку, газета разворачивается; по касанию можно пропустить */
@@ -159,17 +131,14 @@ function applyFont() {
 function toggleControls() {
   controlsOn = !controlsOn;
   ['#rtools', '#rshare', '#rtime'].forEach(function (id) { var e = $(id); if (e) e.classList.toggle('off', !controlsOn); });
-  var sp = $('#spop'); if (sp && !controlsOn) sp.hidden = true;
+  var sp = $('#fontpop'); if (sp && !controlsOn) sp.hidden = true;
 }
 function fillReader(w, text, params) {
   var q = params.get('q') || '', blocks = parseMd(text), saved = Store.s.progress[w.slug], token = R;
   R.blocks = blocks; R.words = countWords(blocks);
   $('#rart').innerHTML = mdHtml(w.title, blocks, q) + nextHtml(w);
   $$('#rart h2, #rart h3').forEach(function (h) { if (!h.id) h.id = slugify(h.textContent); });
-  var fc = $$('#rart p.fear').length, note = $('#fearnote');
-  if (note) note.textContent = fc ? 'Страшных мест в тексте: ' + fc : 'В этом тексте страшные места пока не отмечены';
   applyFont();
-  fearStart();
   if (typeof initCardAnimation === 'function') initCardAnimation();
   if (q) {
     var mk = $('mark', $('#rart'));
@@ -234,7 +203,6 @@ function closeDialog() { $('#overlay-root').innerHTML = ''; if (R) R.dialog = nu
 function openReader(path, params) {
   var slug = path.slice('/read/'.length), w = getWork(slug);
   if (!w) return false;
-  fearStop();
   R = { work: w, blocks: [], dialog: null, words: 0 };
   controlsOn = true;
   Store.addRecent(w.slug);

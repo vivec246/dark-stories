@@ -112,8 +112,8 @@ var savedScroll = null;   /* где стояли на странице пере�
 var returnHash = null;    /* на какую страницу вернуться из читалки */
 var lastShellHash = '#/';
 
-/* страницы «О сайте», «Политика», «Авторские права»: закрываются крестиком и возвращают туда, откуда пришли */
-var DOC_PATHS = ['/about', '/policy', '/copyright'];
+/* страницы «О сайте», «Политика», «Авторские права», «Об авторе»: закрываются крестиком и возвращают туда, откуда пришли */
+var DOC_PATHS = ['/about', '/policy', '/copyright', '/author'];
 var docReturnHash = null, docReturnScroll = null, restoreScroll = null, currentPath = null;
 function isDocPath(p) { return DOC_PATHS.indexOf(p) >= 0; }
 function closeDoc() {

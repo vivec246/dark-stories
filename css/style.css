@@ -122,7 +122,8 @@ main{width:100%;margin:0 auto;flex:1;padding:2rem 1rem}
 .footer .name{font-size:.875rem;font-weight:600;letter-spacing:.28em;text-transform:uppercase;text-align:center}
 .footer .au{margin-top:.25rem;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted-fg);text-align:center}
 .footer .links{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.75rem;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-fg)}
-.footer .links a:hover{color:var(--accent)}
+.footer .links a,.footer .au a{transition:color .3s ease,text-shadow .3s ease}
+.footer .links a:hover,.footer .au a:hover,.footer .links a:focus-visible,.footer .au a:focus-visible{color:#fff;text-shadow:0 0 8px rgba(255,255,255,.9),0 0 20px rgba(255,255,255,.35)}
 
 /* cards (как в версии 3) */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px;padding:20px 0}
@@ -246,10 +247,6 @@ main{width:100%;margin:0 auto;flex:1;padding:2rem 1rem}
 .rtools{position:fixed;top:1rem;right:1rem;z-index:40;display:flex;flex-direction:column;gap:.5rem;transition:opacity .3s ease}
 .share{position:fixed;right:1rem;bottom:1.25rem;z-index:40;transition:opacity .3s ease,background-color .2s,color .2s}
 .rtools.off,.share.off{opacity:0;pointer-events:none}
-.fontwrap{position:relative}
-.fontpop{position:absolute;top:0;right:calc(100% + 10px);display:flex;align-items:center;gap:12px;height:2.75rem;padding:0 18px;border-radius:40px;border:1px solid rgba(136,170,221,.3);background:rgba(20,24,32,.95);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.fontpop[hidden]{display:none}
-.fontpop input{width:110px}
 .rcontent{max-width:700px;margin:0 auto;padding:60px 30px;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);box-shadow:0 10px 40px rgba(0,0,0,.4)}
 .reader.night .rcontent{background:rgba(10,14,23,.98);border:1px solid rgba(136,170,221,.2)}
 .reader.day .rcontent{background:#fdfcf8;border:1px solid rgba(0,0,0,.05);box-shadow:0 10px 40px rgba(0,0,0,.1)}
@@ -626,10 +623,9 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bor
 @media (hover:hover){.book:hover .age-rating{color:#fff}}
 
 /* =====================================================================
-   ЧИТАЛКА: настройки, тема «свеча», режим страха, следующая книга, открытие
+   ЧИТАЛКА: настройки, тема «свеча», следующая книга, открытие
    ===================================================================== */
-.rcontent{transition:filter 1.8s ease,box-shadow 1.8s ease,background-color .4s ease}
-.reader{transition:background-color 1.8s ease}
+.rcontent{transition:box-shadow .4s ease,background-color .4s ease}
 
 /* --- панель настроек --- */
 .spop{position:fixed;top:1rem;right:4.75rem;z-index:41;width:292px;max-height:calc(100svh - 2rem);overflow-y:auto;padding:18px 18px 14px;
@@ -644,7 +640,9 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bor
 .chip:hover{border-color:var(--accent);color:#fff}
 .chip.on{background:rgba(136,170,221,.2);border-color:var(--accent);color:#fff;box-shadow:0 0 14px rgba(136,170,221,.25)}
 .sp-note{margin-top:9px;font-size:11px;line-height:1.45;color:rgba(224,232,245,.5)}
-.sp-keys{margin-top:2px;font-size:10.5px;line-height:1.6;color:rgba(224,232,245,.42)}
+.sp-keys{display:none;margin-top:2px;font-size:10.5px;line-height:1.6;color:rgba(224,232,245,.42)}
+html.kbd .sp-keys{display:block}   /* подсказка по клавишам — только в режиме «только клавиатура» */
+.spop input[type=range]{width:100%}
 .rtime{position:fixed;left:1rem;bottom:1.25rem;z-index:40;padding:9px 15px;border-radius:30px;border:1px solid rgba(136,170,221,.25);
   background:rgba(15,20,30,.8);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
   font:600 10.5px/1 var(--font-sans);letter-spacing:1.5px;text-transform:uppercase;color:rgba(224,232,245,.72);transition:opacity .3s ease}
@@ -669,17 +667,6 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bor
 .reader.candle::before{content:"";position:fixed;inset:0;z-index:30;pointer-events:none;
   background:radial-gradient(ellipse 92% 82% at 50% 45%,transparent 48%,rgba(8,3,0,.5) 100%);animation:candle 5.5s ease-in-out infinite}
 @keyframes candle{0%,100%{opacity:1}8%{opacity:.93}16%{opacity:1}31%{opacity:.9}44%{opacity:.98}58%{opacity:.92}73%{opacity:1}88%{opacity:.95}}
-
-/* --- режим страха: на «страшном» абзаце свет гаснет, по краям сгущается тьма --- */
-.reader::after{content:"";position:fixed;inset:0;z-index:29;pointer-events:none;opacity:0;transition:opacity 1.8s ease;
-  background:radial-gradient(ellipse 62% 52% at 50% 50%,transparent 12%,rgba(0,0,0,.86) 100%)}
-.reader.fear-on::after{opacity:1}
-.reader.fear-on.night{background:#010102}
-.reader.fear-on .rcontent{filter:brightness(.8)}
-.reader.day.fear-on .rcontent{filter:brightness(.5) saturate(.8)}
-.reader.fear-on .rbar i{background:#9b2020}
-.reader.fear-on .reader-body p.fear{color:#f1dcdc;text-shadow:0 0 14px rgba(190,40,40,.45);animation:tremor 5s steps(1) infinite}
-@keyframes tremor{0%,90%,100%{transform:none}91%{transform:translateX(-1px)}92%{transform:translate(1.5px,.5px)}93%{transform:translate(-1px,-.5px)}94%{transform:none}}
 
 /* --- конец текста: следующая книга или статья --- */
 .rnext{margin:72px auto 6px;text-align:center}
@@ -729,15 +716,16 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bor
 .card-img{display:block;width:100%;max-height:58vh;object-fit:contain;margin:14px 0 16px;border-radius:6px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 
 @media (max-width:768px){
-  .spop{top:auto;left:.75rem;right:.75rem;bottom:.75rem;width:auto;max-height:72svh}
+  .spop{top:auto;left:.75rem;right:.75rem;bottom:.75rem;width:auto;max-height:72svh;padding:14px 16px 6px}
+  .spop .sp-sec{margin-bottom:12px}
+  .sp-desk{display:none}   /* на телефоне строка и так во весь экран: «Ширина строки» там ничего не меняет */
   .reader.candle{background:#0b0603}
   .reader.night.candle .rcontent{background:#150d06}
 }
 @media (prefers-reduced-motion:reduce){
-  .reader.candle::before,.reader.fear-on .reader-body p.fear{animation:none}
-  .reader::after,.rcontent,.reader{transition-duration:.01ms}
+  .reader.candle::before{animation:none}
+  .rcontent{transition-duration:.01ms}
 }
-@media (pointer:coarse){.sp-keys{display:none}}
 
 /* =====================================================================
    ОБОРОТ КНИГИ: «Описание» переворачивает книгу, сзади — описание
@@ -757,3 +745,31 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bor
 .bcard.flipped{--ry:calc(172deg + var(--mx,0) * -9deg);--rx:calc(var(--my,0) * -7deg)}
 .bcard.flip-anim .bc-3d{transition:transform .85s cubic-bezier(.4,.1,.2,1)}
 .bcard.flipped::before{transform:translateX(8px)}
+
+/* =====================================================================
+   ОБОРОТ ГАЗЕТЫ: «Описание» переворачивает страницу, сзади — полное описание
+   ===================================================================== */
+.paper{perspective:1500px}
+.pp-flip{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .85s cubic-bezier(.4,.1,.2,1)}
+.pp-sheet{-webkit-backface-visibility:hidden;backface-visibility:hidden}
+.pp-back{transform:rotateY(180deg)}
+.paper.flipped .pp-flip{transform:rotateY(180deg)}
+.pp-desc-btn{flex:none;padding:4px 0;border-bottom:2px solid rgba(28,26,23,.35);font:700 9px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;
+  color:#5b5444;background:none;cursor:pointer;transition:color .2s,border-color .2s}
+.pp-desc-btn:hover{color:#14120f;border-bottom-color:#14120f}
+.pp-back .pp-time{display:none}
+.pp-desc-full{flex:1;min-height:0;overflow-y:auto;padding-right:4px;margin-bottom:8px;font-family:Georgia,"Times New Roman",serif;font-size:14px;line-height:1.55;color:#241f18}
+.pp-desc-full::first-letter{font-family:var(--font-display);font-weight:900;font-size:1.3em;line-height:1;color:#14120f}
+.pp-info{flex:none;margin-bottom:8px;font:600 9px/1.4 var(--font-sans);letter-spacing:.14em;text-transform:uppercase;color:#5b5444}
+.pp-back .pp-foot{justify-content:space-between}
+@media (pointer:coarse){.pp-desc-btn{padding:8px 0}}
+
+/* телефон: книгу в «Книгах» можно крутить пальцем (горизонтальный жест), страница при этом листается вертикальным */
+.bcard,.bcard *{touch-action:pan-y}   /* и внутри прокручиваемого описания на обороте: иначе браузер перехватывает жест */
+.bcard.dragging .bc-3d{transition:none}
+@media (hover:none){.bcard{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}}
+
+/* знак DS в кружках на корешках: SVG, буквы по центру независимо от шрифта */
+.bk-emblem,.bc-emblem{padding:0}
+.bk-emblem svg,.bc-emblem svg{display:block;width:100%;height:100%}
+.bk-emblem text,.bc-emblem text{font-family:var(--font-display);font-weight:700;fill:var(--accent);text-anchor:middle}

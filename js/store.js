@@ -1,4 +1,4 @@
-/* ХРАНИЛИЩЕ в localStorage: избранное («Ваша полка»), прогресс чтения, закладки, настройки читалки (тема, шрифт, ширина, интервал, режим страха). */
+/* ХРАНИЛИЩЕ в localStorage: избранное («Ваша полка»), прогресс чтения, закладки, настройки читалки (тема, шрифт, ширина, интервал). */
 
 var KEY = 'dark-stories-library';
 var memory = {};
@@ -6,7 +6,7 @@ function lsGet(k) { try { return window.localStorage.getItem(k); } catch (e) { r
 function lsSet(k, v) { try { window.localStorage.setItem(k, v); } catch (e) { memory[k] = v; } }
 var Store = (function () {
   var s = { favorites: [], recent: [], progress: {}, bookmarks: {}, fontSize: 1.1, readerNight: true,
-    readerTheme: '', readerFont: 'sans', readerWidth: 'normal', readerLead: 'normal', readerFear: false };
+    readerTheme: '', readerFont: 'sans', readerWidth: 'normal', readerLead: 'normal' };
   try {
     var raw = JSON.parse(lsGet(KEY) || 'null');
     if (raw && raw.state) for (var k in s) if (raw.state[k] !== undefined) s[k] = raw.state[k];
