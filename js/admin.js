@@ -30,7 +30,7 @@ Object.assign(ICONS, {
 });
 
 /* ───────── состояние ───────── */
-var S = null;           // рабочая копия данных сайта: SITE, HERO, HERO_FOCUS, NOTES, WORKS, NEWS
+var S = null;           // рабочая копия данных сайта: SITE, HERO, HERO_FOCUS, HERO_FOCUS_Y, NOTES, WORKS, NEWS
 var BASE = null;        // то, что сейчас на сайте (для сравнения)
 var REPO = new Set();   // файлы, которые уже есть на сайте (обложки, тексты, картинки шапки)
 var files = {};         // изменения файлов: путь → {type:'text'|'bin'|'del', text|blob}
@@ -57,7 +57,7 @@ function saveGh() {
 var clone = function (o) { return JSON.parse(JSON.stringify(o)); };
 
 function initState(d, notes) {
-  S = { SITE: clone(d.SITE), HERO: clone(d.HERO), HERO_FOCUS: clone(d.HERO_FOCUS), NOTES: notes || {}, WORKS: clone(d.WORKS), NEWS: clone(d.NEWS) };
+  S = { SITE: clone(d.SITE), HERO: clone(d.HERO), HERO_FOCUS: clone(d.HERO_FOCUS), HERO_FOCUS_Y: clone(d.HERO_FOCUS_Y || {}), NOTES: notes || {}, WORKS: clone(d.WORKS), NEWS: clone(d.NEWS) };
   baseline();
 }
 function baseline() {
@@ -98,6 +98,8 @@ function serialize() {
     var n = (S.NOTES[p] || '').replace(/[\r\n]+/g, ' ').trim();
     return "  '" + p + "': " + Math.round(f) + (i < S.HERO.length - 1 ? ',' : '') + (n ? '   // ' + n : '');
   }).join('\n');
+  var fyKeys = S.HERO.filter(function (p) { return typeof S.HERO_FOCUS_Y[p] === 'number'; });
+  var focusY = fyKeys.map(function (p, i) { return "  '" + p + "': " + Math.round(S.HERO_FOCUS_Y[p]) + (i < fyKeys.length - 1 ? ',' : ''); }).join('\n');
   var works = S.WORKS.map(function (w) {
     var o = {};
     KEYS.forEach(function (k) {
@@ -122,18 +124,21 @@ function serialize() {
     '/* Где в картинке главный объект (число — процент от ширины картинки: 0 — левый край, 50 — середина, 100 — правый).\n' +
     '   Когда экран узкий (телефон) и картинка обрезается по бокам, сайт сам подбирает кадр так,\n' +
     '   чтобы этот объект оказался по центру. По вертикали всегда показывается верх картинки. */\n' +
-    'var HERO_FOCUS = {\n' + focus + '\n};\n\n' +
+    'var HERO_FOCUS = {\n' + focus + '\n};\n' +
+    '/* То же по вертикали: на каком проценте высоты картинки главный объект (0 — верх, 100 — низ).\n' +
+    '   Работает на широких экранах (компьютер), где картинка обрезается сверху и снизу. Если картинки здесь нет — показывается верх. */\n' +
+    'var HERO_FOCUS_Y = {' + (focusY ? '\n' + focusY + '\n' : '') + '};\n\n' +
     '/* Список текстов: чтобы добавить рассказ — положите .md в stories/ или articles/ и добавьте строку сюда */\n' +
     'var WORKS = ' + J(works) + ';\n\n' +
     'var NEWS = [\n' + news + '\n];\n';
 }
 function parseData(text) {
-  var d = new Function(text + '\n;return {SITE:SITE,HERO:HERO,HERO_FOCUS:HERO_FOCUS,WORKS:WORKS,NEWS:NEWS};')();
+  var d = new Function(text + '\n;return {SITE:SITE,HERO:HERO,HERO_FOCUS:HERO_FOCUS,HERO_FOCUS_Y:(typeof HERO_FOCUS_Y!=="undefined"?HERO_FOCUS_Y:{}),WORKS:WORKS,NEWS:NEWS};')();
   var notes = {}, re = /'(cap\/[^']+)'\s*:\s*[\d.]+\s*,?[ \t]*\/\/[ \t]*(.*)$/gm, m;
   while ((m = re.exec(text))) notes[m[1]] = m[2].trim();
   return { d: d, notes: notes };
 }
-function pickData(x) { return JSON.stringify({ a: x.SITE, b: x.HERO, c: x.HERO_FOCUS, d: x.NOTES, e: x.WORKS, f: x.NEWS }); }
+function pickData(x) { return JSON.stringify({ a: x.SITE, b: x.HERO, c: x.HERO_FOCUS, d: x.NOTES, e: x.WORKS, f: x.NEWS, g: x.HERO_FOCUS_Y }); }
 function dataChanged() { return pickData(S) !== pickData(BASE); }
 
 /* что изменилось, словами */
@@ -147,7 +152,7 @@ function summary() {
   var ob = S.WORKS.filter(function (w) { return a[w.slug]; }).map(function (w) { return w.slug; }).join();
   if (oa !== ob) out.push('Изменён порядок текстов на полке');
   if (JSON.stringify(BASE.NEWS) !== JSON.stringify(S.NEWS)) out.push('Новости изменены');
-  if (JSON.stringify([BASE.HERO, BASE.HERO_FOCUS, BASE.NOTES]) !== JSON.stringify([S.HERO, S.HERO_FOCUS, S.NOTES])) out.push('Шапка сайта изменена');
+  if (JSON.stringify([BASE.HERO, BASE.HERO_FOCUS, BASE.HERO_FOCUS_Y, BASE.NOTES]) !== JSON.stringify([S.HERO, S.HERO_FOCUS, S.HERO_FOCUS_Y, S.NOTES])) out.push('Шапка сайта изменена');
   if (JSON.stringify(BASE.SITE) !== JSON.stringify(S.SITE)) out.push('Настройки сайта изменены');
   return out;
 }
@@ -508,25 +513,35 @@ VIEWS.news = function () {
 
 /* —— Шапка —— */
 function heroPhone(item) {
-  var pic = item.querySelector('.hero-pic img'), ph = item.querySelector('.phone img'), box = item.querySelector('.phone');
+  var pic = item.querySelector('.hero-pic img');
   if (!pic || !pic.naturalWidth) return;
-  var q = Number(item.dataset.focus); if (isNaN(q)) q = 50;
-  var cw = box.clientWidth, ch = box.clientHeight, iw = pic.naturalWidth, ih = pic.naturalHeight;
-  var sc = Math.max(cw / iw, ch / ih), dw = iw * sc, over = dw - cw;
-  var p = over > 1 ? Math.min(1, Math.max(0, (q / 100 * dw - cw / 2) / over)) : .5;
-  ph.style.objectPosition = (p * 100).toFixed(1) + '% 0%';
+  var fx = Number(item.dataset.focus), fy = Number(item.dataset.fy);
+  if (isNaN(fx)) fx = 50; if (isNaN(fy)) fy = 0;
+  var iw = pic.naturalWidth, ih = pic.naturalHeight, cl = function (v) { return Math.min(1, Math.max(0, v)); };
+  /* те же формулы, что на сайте (router.js, heroFocusOne): так превью совпадает с тем, что увидят читатели */
+  $$('.pv', item).forEach(function (box) {
+    var im = box.querySelector('img'), cw = box.clientWidth, ch = box.clientHeight;
+    var sc = Math.max(cw / iw, ch / ih), dw = iw * sc, dh = ih * sc, ox = dw - cw, oy = dh - ch;
+    var px = ox > 1 ? cl((fx / 100 * dw - cw / 2) / ox) : .5, py = oy > 1 ? cl((fy / 100 * dh - ch / 2) / oy) : 0;
+    im.style.objectPosition = (px * 100).toFixed(1) + '% ' + (py * 100).toFixed(1) + '%';
+  });
 }
 VIEWS.hero = function () {
   return { title: 'Шапка', after: function () { $$('.hero-item').forEach(heroPhone); }, html:
     '<div class="page-h"><div><span class="eyebrow">Главная страница</span><h2>Картинки шапки</h2></div><span class="sp"></span><button class="btn" data-act="hero-add">' + icon('plus') + 'Добавить картинку</button><input type="file" accept="image/*" data-file="hero" hidden></div>' +
-    '<p class="lead muted" style="margin-bottom:1.2rem;max-width:680px">Картинки листаются на главной. На узком экране телефона их края обрезаются — отметьте, где главный объект, и сайт поставит его по центру. Справа видно, как кадр выглядит на телефоне.</p>' +
+    '<p class="lead muted" style="margin-bottom:1.2rem;max-width:720px">Картинки листаются на главной. Когда экран не совпадает с пропорциями картинки, её края обрезаются. Отметьте, где главный объект: <b>по горизонтали</b> — это работает на телефоне и планшете, <b>по вертикали</b> — на компьютере, где картинка обрезается сверху и снизу. Справа видно, как выглядит кадр на компьютере и на телефоне.</p>' +
     '<div class="hero-list">' + S.HERO.map(function (p, i) {
       var f = S.HERO_FOCUS[p]; if (f === undefined) f = 50;
-      return '<div class="hero-item" data-i="' + i + '" data-focus="' + f + '"><div><div class="hero-pic"><img src="' + esc(imgUrl(p)) + '" alt="" onload="this.closest(\'.hero-item\').dispatchEvent(new Event(\'heroload\'))"><i class="guide" style="left:' + f + '%"></i></div>' +
-        '<div class="hero-ctl"><div class="row-r"><div class="f"><label for="hr' + i + '">Главный объект по горизонтали</label><input id="hr' + i + '" type="range" min="0" max="100" value="' + f + '" data-bind="hero:' + i + ':focus"></div><input class="in" type="number" min="0" max="100" value="' + f + '" data-bind="hero:' + i + ':focus" aria-label="Процент"></div>' +
+      var fy = typeof S.HERO_FOCUS_Y[p] === 'number' ? S.HERO_FOCUS_Y[p] : 0;
+      var slider = function (id, label, key, v, hint) {
+        return '<div class="row-r"><div class="f"><label for="' + id + i + '">' + label + '</label><input id="' + id + i + '" type="range" min="0" max="100" value="' + v + '" data-bind="hero:' + i + ':' + key + '"><small>' + hint + '</small></div><input class="in" type="number" min="0" max="100" value="' + v + '" data-bind="hero:' + i + ':' + key + '" aria-label="Процент"></div>';
+      };
+      return '<div class="hero-item" data-i="' + i + '" data-focus="' + f + '" data-fy="' + fy + '"><div><div class="hero-pic"><img src="' + esc(imgUrl(p)) + '" alt="" onload="this.closest(\'.hero-item\').dispatchEvent(new Event(\'heroload\'))"><i class="guide" style="left:' + f + '%"></i><i class="guide-y" style="top:' + fy + '%"></i></div>' +
+        '<div class="hero-ctl">' + slider('hr', 'Главный объект по горизонтали (телефон, планшет)', 'focus', f, '0 — левый край, 100 — правый') +
+        slider('hv', 'Главный объект по вертикали (компьютер)', 'focusy', fy, '0 — верх картинки (как раньше), 100 — низ') +
         field('Заметка для себя', 'hero:' + i + ':note', S.NOTES[p] || '', { ph: 'что на картинке' }) +
         '<div class="acts"><span class="badge">' + esc(p) + '</span><span class="sp" style="flex:1"></span><button type="button" class="btn ghost sm ico-only" data-act="hero-mv" data-i="' + i + '" data-d="-1" aria-label="Левее"' + (i === 0 ? ' disabled' : '') + '>' + icon('up') + '</button><button type="button" class="btn ghost sm ico-only" data-act="hero-mv" data-i="' + i + '" data-d="1" aria-label="Правее"' + (i === S.HERO.length - 1 ? ' disabled' : '') + '>' + icon('down') + '</button><button type="button" class="btn danger sm ico-only" data-act="hero-del" data-i="' + i + '" aria-label="Удалить">' + icon('trash') + '</button></div></div></div>' +
-        '<div><div class="phone"><img src="' + esc(imgUrl(p)) + '" alt=""></div><p class="phone-cap muted small">на телефоне</p></div></div>';
+        '<div class="hero-prev"><div><div class="phone pv pc"><img src="' + esc(imgUrl(p)) + '" alt=""></div><p class="phone-cap muted small">на компьютере</p></div><div><div class="phone pv"><img src="' + esc(imgUrl(p)) + '" alt=""></div><p class="phone-cap muted small">на телефоне</p></div></div></div>';
     }).join('') + '</div>' };
 };
 
@@ -720,9 +735,11 @@ function onBind(el) {
     var p = S.HERO[+parts[1]], item = el.closest('.hero-item'); if (p === undefined) return;
     if (parts[2] === 'note') { if (v.trim()) S.NOTES[p] = v; else delete S.NOTES[p]; }
     else {
-      var f = Math.min(100, Math.max(0, Number(v) || 0)); S.HERO_FOCUS[p] = f; item.dataset.focus = f;
-      $$('[data-bind^="hero:' + parts[1] + ':focus"]', item).forEach(function (x) { if (x !== el) x.value = f; });
-      item.querySelector('.guide').style.left = f + '%'; heroPhone(item);
+      var vert = parts[2] === 'focusy', f = Math.min(100, Math.max(0, Number(v) || 0));
+      if (vert) { S.HERO_FOCUS_Y[p] = f; item.dataset.fy = f; item.querySelector('.guide-y').style.top = f + '%'; }
+      else { S.HERO_FOCUS[p] = f; item.dataset.focus = f; item.querySelector('.guide').style.left = f + '%'; }
+      $$('[data-bind="hero:' + parts[1] + ':' + parts[2] + '"]', item).forEach(function (x) { if (x !== el) x.value = f; });
+      heroPhone(item);
     }
   } else if (scope === 'gh') {
     if (parts[1] === 'remember') { CONN.gh.remember = v; } else CONN.gh[parts[1]] = v;
@@ -815,7 +832,7 @@ var ACT = {
     var p = S.HERO[+el.dataset.i];
     if (S.HERO.length < 2) { notify('В шапке должна остаться хотя бы одна картинка', true); return; }
     if (!await ask('Убрать картинку из шапки?', esc(p) + ' перестанет показываться на главной.', 'Убрать', true)) return;
-    S.HERO.splice(+el.dataset.i, 1); delete S.HERO_FOCUS[p]; delete S.NOTES[p]; removeFile(p); render();
+    S.HERO.splice(+el.dataset.i, 1); delete S.HERO_FOCUS[p]; delete S.HERO_FOCUS_Y[p]; delete S.NOTES[p]; removeFile(p); render();
   },
   'mode': function (el) { CONN.mode = el.dataset.v; localSet('ds-admin-mode', CONN.mode); render(); },
   'gh-test': function (el) { run(el, ghTest); },

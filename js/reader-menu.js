@@ -18,6 +18,9 @@ function showContextMenu(x, y) {
 
 document.addEventListener('contextmenu', function (e) {
   if (!R || !e.target.closest || !e.target.closest('#reader') || e.target.closest('.v3modal')) return;
+  /* на сенсорном экране не перехватываем долгое касание: пусть работает родное выделение с ручками,
+     а «Копировать / Цитата / Открытка» показывает нижняя панель (см. ниже) */
+  if (window.matchMedia && matchMedia('(hover:none)').matches) return;
   e.preventDefault();
   /* выделение запоминаем сразу: после клика по меню браузер его снимет */
   capturedSelectionText = String(window.getSelection() || '').trim();
@@ -194,3 +197,42 @@ function quoteCard() {
     .then(function (blob) { showCardPreview(blob, w); })
     .catch(function () { toast('Не удалось сделать открытку'); });
 }
+
+
+/* ПАНЕЛЬ ВЫДЕЛЕНИЯ ДЛЯ ТЕЛЕФОНА: появляется внизу, пока в тексте выделена фраза */
+(function () {
+  var bar, timer;
+  function touch() { return window.matchMedia && matchMedia('(hover:none)').matches; }
+  function build() {
+    if (bar) return bar;
+    bar = document.createElement('div');
+    bar.id = 'selbar'; bar.hidden = true;
+    bar.innerHTML = '<button type="button" data-sel="copy">Копировать</button><button type="button" data-sel="quote">Цитата</button><button type="button" data-sel="card">Открытка</button>';
+    document.body.appendChild(bar);
+    /* mousedown/touchstart не должны снимать выделение до нажатия */
+    bar.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    bar.addEventListener('touchstart', function (e) { e.stopPropagation(); }, { passive: true });
+    bar.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      e.stopPropagation();
+      var a = b.getAttribute('data-sel');
+      bar.hidden = true;
+      if (a === 'copy') copySelection(); else if (a === 'quote') quoteSelection(); else if (a === 'card') quoteCard();
+    });
+    return bar;
+  }
+  function inReader(sel) {
+    var n = sel.anchorNode; if (!n) return false;
+    var el = n.nodeType === 1 ? n : n.parentElement;
+    return !!(el && el.closest && el.closest('#rart'));
+  }
+  function update() {
+    if (!touch()) return;
+    var b = build();
+    var sel = window.getSelection();
+    var txt = sel ? String(sel).trim() : '';
+    if (R && txt && sel.rangeCount && inReader(sel)) { capturedSelectionText = txt; b.hidden = false; }
+    else b.hidden = true;
+  }
+  document.addEventListener('selectionchange', function () { clearTimeout(timer); timer = setTimeout(update, 250); });
+})();

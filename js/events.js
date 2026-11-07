@@ -69,7 +69,10 @@ document.addEventListener('click', function (e) {
   if ((el = up('.book[data-href]')) && !up('a, button')) {
     /* на сенсорном экране нет наведения: касание разворачивает книгу, а читать можно только кнопкой «Читать» */
     if (window.matchMedia && matchMedia('(hover:none)').matches) {
-      if (!el.classList.contains('open')) {
+      if (el.classList.contains('open')) {
+        /* повторное касание уже раскрытой книги возвращает её на полку */
+        el.classList.remove('open');
+      } else {
         $$('.book.open').forEach(function (b) { b.classList.remove('open'); });
         el.classList.add('open'); el._t = Date.now();
         if (el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
@@ -315,4 +318,45 @@ document.addEventListener('pointerout', function (e) {
     if (lx >= 0 && Math.abs(e.clientX - lx) + Math.abs(e.clientY - ly) > 4) off();
     lx = e.clientX; ly = e.clientY;
   });
+})();
+
+
+/* КНОПКА «НАЗАД» НА ТЕЛЕФОНЕ закрывает открытое окно (настройки, тема, оглавление, закладки, цитата),
+   а не уходит из читалки: пока что-то открыто, в истории лежит одна служебная запись */
+(function () {
+  var marked = false, ownBack = false;
+  function mobile() { return window.matchMedia && matchMedia('(max-width: 768px), (hover: none)').matches; }
+  function anyOpen() {
+    if (!R) return false;
+    var f = $('#fontpop'), t = $('#themepop');
+    return !!((f && !f.hidden) || (t && !t.hidden) || $('#overlay-root .v3modal') ||
+      (typeof quoteShareOpen === 'function' && quoteShareOpen()) ||
+      (typeof cardPreviewOpen === 'function' && cardPreviewOpen()));
+  }
+  function closeAll() {
+    var f = $('#fontpop'), t = $('#themepop');
+    if (f) f.hidden = true; if (t) t.hidden = true;
+    if (typeof closeDialog === 'function') closeDialog();
+    if (typeof closeQuoteShare === 'function') closeQuoteShare();
+    if (typeof closeCardPreview === 'function') closeCardPreview();
+    if (typeof hideContextMenu === 'function') hideContextMenu();
+  }
+  function sync() {
+    if (!mobile()) return;
+    var open = anyOpen();
+    if (open && !marked) {
+      history.pushState({ dsModal: 1 }, '', location.href); marked = true;
+    } else if (!open && marked) {
+      marked = false;
+      if (history.state && history.state.dsModal) { ownBack = true; history.back(); }
+    }
+  }
+  window.addEventListener('popstate', function () {
+    if (ownBack) { ownBack = false; return; }
+    if (marked) { marked = false; closeAll(); }
+  });
+  /* ушли из читалки другим путём — служебная запись уже не нужна */
+  window.addEventListener('hashchange', function () { marked = false; });
+  document.addEventListener('click', function () { setTimeout(sync, 0); }, true);
+  setInterval(sync, 300);
 })();

@@ -12,9 +12,12 @@ function heroFocusOne(img) {
   /* картинка шапки выше самой шапки на --ext: этот «хвост» виден под меню */
   var ext = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ext')) || 0;
   var cw = hero.clientWidth, ch = hero.clientHeight + ext, iw = img.naturalWidth, ih = img.naturalHeight;
-  var scale = Math.max(cw / iw, ch / ih), dw = iw * scale, over = dw - cw;
+  var scale = Math.max(cw / iw, ch / ih), dw = iw * scale, dh = ih * scale, over = dw - cw, overY = dh - ch;
   var p = over > 1 ? Math.min(1, Math.max(0, (q / 100 * dw - cw / 2) / over)) : 0.5;
-  img.style.objectPosition = (p * 100).toFixed(1) + '% 0%';
+  /* по вертикали: если задана высота главного объекта (HERO_FOCUS_Y) — подбираем кадр так же; иначе показываем верх картинки, как раньше */
+  var qy = (typeof HERO_FOCUS_Y !== 'undefined') ? HERO_FOCUS_Y[img.getAttribute('src')] : undefined;
+  var py = (typeof qy === 'number' && overY > 1) ? Math.min(1, Math.max(0, (qy / 100 * dh - ch / 2) / overY)) : 0;
+  img.style.objectPosition = (p * 100).toFixed(1) + '% ' + (py * 100).toFixed(1) + '%';
 }
 function heroFocusAll() { $$('.hero .slide, .nav-slide').forEach(heroFocusOne); }
 (function () {
