@@ -7,6 +7,10 @@ document.addEventListener('click', function (e) {
   var fpop = $('#fontpop');
   var closedSp = false;   /* касание мимо панели настроек только закрывает её и не прячет кнопки */
   if (fpop && !fpop.hidden && !up('#fontpop') && !up('[data-act="font"]')) { fpop.hidden = true; closedSp = true; }
+  var tpop = $('#themepop');
+  if (tpop && !tpop.hidden && !up('#themepop') && !up('[data-act="theme"]')) { tpop.hidden = true; closedSp = true; }
+  /* выбор стиля читалки (Стандартная / Sci-Fi) */
+  if ((el = up('[data-style]')) && R) { setReaderStyle(el.getAttribute('data-style')); return; }
   /* кнопки настроек чтения: тема, шрифт, ширина, интервал */
   if ((el = up('[data-pref]')) && R) { setReaderPref(el.getAttribute('data-pref'), el.getAttribute('data-val')); return; }
   if ((el = up('.hero-dot'))) {
@@ -98,10 +102,10 @@ document.addEventListener('click', function (e) {
   if ((el = up('[data-act]')) && R) {
     var act = el.getAttribute('data-act'), w = R.work;
     if (act === 'close') { location.hash = returnHash || (w.kind === 'article' ? '#/articles' : '#/'); }
-    else if (act === 'theme') cycleTheme();
+    else if (act === 'theme') { var tp = $('#themepop'), fp0 = $('#fontpop'); if (fp0) fp0.hidden = true; tp.hidden = !tp.hidden; }
     else if (act === 'bookmarks') openDialog('bookmarks');
     else if (act === 'toc') openDialog('toc');
-    else if (act === 'font') { var fp = $('#fontpop'); fp.hidden = !fp.hidden; }
+    else if (act === 'font') { var fp = $('#fontpop'), tp1 = $('#themepop'); if (tp1) tp1.hidden = true; fp.hidden = !fp.hidden; }
     else if (act === 'share') {
       var url = location.origin + location.pathname + '#/read/' + w.slug;
       if (navigator.share) navigator.share({ title: w.title, url: url }).catch(function () {});
@@ -118,6 +122,7 @@ document.addEventListener('keydown', function (e) {
     if (contextMenuOpen()) { hideContextMenu(); return; }
     if (cardPreviewOpen()) { closeCardPreview(); return; }
     var spEsc = $('#fontpop'); if (spEsc && !spEsc.hidden) { spEsc.hidden = true; return; }
+    var tpEsc = $('#themepop'); if (tpEsc && !tpEsc.hidden) { tpEsc.hidden = true; return; }
     if (quoteShareOpen()) { closeQuoteShare(); return; }
     if ($('#overlay-root .v3modal')) { closeDialog(); return; }
     var rs = $('#results'); if (rs && !rs.hidden) { closeResults(); return; }

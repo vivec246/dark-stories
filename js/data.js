@@ -37,7 +37,9 @@ var WORKS = [
     "age": "18+",
     "year": "2025",
     "status": "published",
-    "minutes": 90
+    "minutes": 90,
+    "readerStyle": "fantasy",
+    "readerStyleChoice": true
   },
   {
     "slug": "mission-hades",
@@ -51,7 +53,9 @@ var WORKS = [
     "age": "18+",
     "year": "2025",
     "status": "published",
-    "minutes": 22
+    "minutes": 22,
+    "readerStyle": "scifi",
+    "readerStyleChoice": true
   },
   {
     "slug": "detective-murr",
@@ -93,7 +97,9 @@ var WORKS = [
     "age": "18+",
     "year": "2026",
     "status": "wip",
-    "minutes": 1
+    "minutes": 1,
+    "readerStyle": "fantasy",
+    "readerStyleChoice": true
   },
   {
     "slug": "lord-balderon",
@@ -108,6 +114,8 @@ var WORKS = [
     "year": "2026",
     "status": "published",
     "minutes": 3,
+    "readerStyle": "fantasy",
+    "readerStyleChoice": true,
     "cycle": [
       "Сказ первый. Глина",
       "Сказ второй. Дар",

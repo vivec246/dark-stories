@@ -6,7 +6,7 @@ function lsGet(k) { try { return window.localStorage.getItem(k); } catch (e) { r
 function lsSet(k, v) { try { window.localStorage.setItem(k, v); } catch (e) { memory[k] = v; } }
 var Store = (function () {
   var s = { favorites: [], recent: [], progress: {}, bookmarks: {}, fontSize: 1.1, readerNight: true,
-    readerTheme: '', readerFont: 'sans', readerWidth: 'normal', readerLead: 'normal' };
+    readerTheme: '', readerFont: 'sans', readerWidth: 'normal', readerLead: 'normal', styleBy: {} };
   try {
     var raw = JSON.parse(lsGet(KEY) || 'null');
     if (raw && raw.state) for (var k in s) if (raw.state[k] !== undefined) s[k] = raw.state[k];
@@ -46,6 +46,7 @@ var Store = (function () {
     removeBookmark: function (slug, id) { s.bookmarks[slug] = (s.bookmarks[slug] || []).filter(function (b) { return b.id !== id; }); save(true); },
     setFont: function (v) { s.fontSize = v; save(); },
     setNight: function (v) { s.readerNight = v; save(true); },
+    setStyle: function (slug, v) { s.styleBy[slug] = v; save(true); },
     setPref: function (k, v) { s[k] = v; if (k === 'readerTheme') s.readerNight = v !== 'day'; save(true); }
   };
 })();

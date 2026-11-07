@@ -11,6 +11,32 @@ var TRASH = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><polyline p
 /* темы, шрифт, ширина строки, интервал */
 var THEMES = ['night', 'day', 'candle'];
 var THEME_NAMES = { night: 'Ночь', day: 'День', candle: 'Свеча' };
+/* стиль оформления читалки: «Стандартная» и «Sci-Fi» (терминал будущего). Какой стиль у текста — задаётся в админке (readerStyle, readerStyleChoice) */
+var STYLES = [['standard', 'Стандартная'], ['scifi', 'Sci-Fi'], ['fantasy', 'Фэнтези']];
+function styleName(id) { for (var i = 0; i < STYLES.length; i++) if (STYLES[i][0] === id) return STYLES[i][1]; return id; }
+/* какие стили предложены читателю: «Стандартная» и стиль текста (если автор включил выбор) */
+function styleOptions(w) {
+  var def = w && (w.readerStyle === 'scifi' || w.readerStyle === 'fantasy') ? w.readerStyle : 'standard';
+  return def !== 'standard' && w.readerStyleChoice ? ['standard', def] : [def];
+}
+function workStyle(w) {
+  if (!w) return 'standard';
+  var def = w.readerStyle === 'scifi' || w.readerStyle === 'fantasy' ? w.readerStyle : 'standard';
+  var opts = styleOptions(w);
+  if (opts.length < 2) return def;
+  var s = Store.s.styleBy[w.slug];
+  return opts.indexOf(s) >= 0 ? s : def;
+}
+/* шрифты для Sci-Fi подгружаем только тогда, когда стиль реально нужен */
+function ensureStyleFonts(style) {
+  var id = 'fonts-' + style;
+  if (style === 'standard' || document.getElementById(id)) return;
+  var l = document.createElement('link'); l.id = id; l.rel = 'stylesheet';
+  l.href = style === 'scifi'
+    ? 'https://fonts.googleapis.com/css2?family=Tektur:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap'
+    : 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Alegreya:wght@400;500&display=swap';
+  document.head.appendChild(l);
+}
 
 function prefIsOn(key, val) {
   return Store.s[key] === val;
@@ -29,14 +55,27 @@ function textPanelHtml() {
     '<div class="sp-sec"><div class="sp-t">Интервал</div><div class="sp-chips">' + chipsHtml('readerLead', [['tight', 'Плотно'], ['normal', 'Обычно'], ['loose', 'Свободно']]) + '</div></div>' +
     '<p class="sp-keys">Клавиши: ← → листать · + − размер · T тема · F без кнопок</p></div>';
 }
-function readerClass() {
+function readerClass(w) {
   var t = Store.s.readerTheme;
-  return 'reader ' + (t === 'day' ? 'day' : 'night' + (t === 'candle' ? ' candle' : ''));
+  return 'reader ' + (t === 'day' ? 'day' : 'night' + (t === 'candle' ? ' candle' : '')) + (workStyle(w) !== 'standard' ? ' ' + workStyle(w) : '');
+}
+/* окно под кнопкой смены темы: Ночь / День / Свеча, а ниже — стиль (если у текста их несколько) */
+function themePanelHtml(w) {
+  var h = '<div class="spop tpop" id="themepop" hidden><div class="sp-sec"><div class="sp-t">Тема</div><div class="sp-chips">' +
+    chipsHtml('readerTheme', THEMES.map(function (t) { return [t, THEME_NAMES[t]]; })) + '</div></div>';
+  var opts = styleOptions(w);
+  if (opts.length > 1) {
+    h += '<div class="sp-sec"><div class="sp-t">Стиль</div><div class="sp-chips">' + opts.map(function (id) {
+      return '<button type="button" class="chip" data-style="' + id + '">' + styleName(id) + '</button>';
+    }).join('') + '</div></div>';
+  }
+  return h + '</div>';
 }
 
 function readerShell(w) {
   var S = Store.s;
-  return '<div class="' + readerClass() + '" id="reader" data-font="' + S.readerFont + '" data-width="' + S.readerWidth + '" data-lead="' + S.readerLead + '">' +
+  ensureStyleFonts(workStyle(w));
+  return '<div class="' + readerClass(w) + '" id="reader"' + (w.art ? ' style="--art:url(\'' + esc(w.art) + '\')"' : '') + ' data-font="' + S.readerFont + '" data-width="' + S.readerWidth + '" data-lead="' + S.readerLead + '">' +
     '<div class="rbar" aria-hidden="true"><i id="rbar"></i></div>' +
     '<div class="rtools" id="rtools">' +
     '<button type="button" class="btn control" data-act="close" aria-label="Закрыть читалку">' + icon('back') + '</button>' +
@@ -44,7 +83,7 @@ function readerShell(w) {
     '<button type="button" class="btn control" data-act="bookmarks" aria-label="Закладки">' + icon('bookmark') + '</button>' +
     '<button type="button" class="btn control" data-act="font" aria-label="Настройки текста">' + icon('type') + '</button>' +
     '<button type="button" class="btn control" data-act="toc" aria-label="Содержание">' + icon('list') + '</button></div>' +
-    textPanelHtml() +
+    textPanelHtml() + themePanelHtml(w) +
     '<div class="rtime" id="rtime" aria-live="off"></div>' +
     '<button type="button" class="btn control share" id="rshare" data-act="share" aria-label="Поделиться">' + icon('share') + '</button>' +
     '<div class="rcontent" id="rcontent"><div id="rart"><div class="loadmsg">' + SPINNER + '<p>ЗАГРУЗКА</p></div></div></div></div>';
@@ -57,14 +96,24 @@ function applyReaderPrefs() {
   rd.classList.toggle('day', S.readerTheme === 'day');
   rd.classList.toggle('night', S.readerTheme !== 'day');
   rd.classList.toggle('candle', S.readerTheme === 'candle');
+  var st = workStyle(R && R.work);
+  rd.classList.toggle('scifi', st === 'scifi');
+  rd.classList.toggle('fantasy', st === 'fantasy');
+  ensureStyleFonts(st);
   rd.setAttribute('data-font', S.readerFont);
   rd.setAttribute('data-width', S.readerWidth);
   rd.setAttribute('data-lead', S.readerLead);
-  $$('#fontpop .chip').forEach(function (c) { c.classList.toggle('on', prefIsOn(c.getAttribute('data-pref'), c.getAttribute('data-val'))); });
+  $$('.spop .chip[data-pref]').forEach(function (c) { c.classList.toggle('on', prefIsOn(c.getAttribute('data-pref'), c.getAttribute('data-val'))); });
+  $$('.spop .chip[data-style]').forEach(function (c) { c.classList.toggle('on', c.getAttribute('data-style') === workStyle(R && R.work)); });
   updateProgressBar();
 }
 function setReaderPref(k, v) {
   Store.setPref(k, v);
+  applyReaderPrefs();
+}
+function setReaderStyle(v) {
+  if (!R) return;
+  Store.setStyle(R.work.slug, v);
   applyReaderPrefs();
 }
 function cycleTheme() {
@@ -132,6 +181,7 @@ function toggleControls() {
   controlsOn = !controlsOn;
   ['#rtools', '#rshare', '#rtime'].forEach(function (id) { var e = $(id); if (e) e.classList.toggle('off', !controlsOn); });
   var sp = $('#fontpop'); if (sp && !controlsOn) sp.hidden = true;
+  var tp = $('#themepop'); if (tp && !controlsOn) tp.hidden = true;
 }
 function fillReader(w, text, params) {
   var q = params.get('q') || '', blocks = parseMd(text), saved = Store.s.progress[w.slug], token = R;

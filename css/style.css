@@ -773,3 +773,127 @@ html.kbd .sp-keys{display:block}   /* подсказка по клавишам �
 .bk-emblem,.bc-emblem{padding:0}
 .bk-emblem svg,.bc-emblem svg{display:block;width:100%;height:100%}
 .bk-emblem text,.bc-emblem text{font-family:var(--font-display);font-weight:700;fill:var(--accent);text-anchor:middle}
+
+/* =====================================================================
+   СТИЛЬ ЧИТАЛКИ «SCI-FI» — терминал будущего. Включается у текста в админке (readerStyle).
+   Работает с тремя темами: ночь, день, свеча. Цвета — в переменных --sf-*.
+   ===================================================================== */
+#reader.scifi{--sf-head:'Tektur',var(--font-display),sans-serif;--sf-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--sf-bg);background-attachment:fixed}
+#reader.scifi.night{--sf-bg:radial-gradient(ellipse 70% 60% at 50% 40%,#0a2336 0%,#04101a 55%,#02060b 100%);--sf-panel:rgba(5,18,29,.94);--sf-line:rgba(79,209,255,.34);--sf-soft:rgba(79,209,255,.12);--sf-acc:#4fd1ff;--sf-acc2:#a6ecff;--sf-ink:#cfe9f5;--sf-dim:#78a0b6;--sf-glow:0 0 18px rgba(79,209,255,.35);--sf-tglow:0 0 22px rgba(79,209,255,.45);--sf-scan:rgba(0,0,0,.18);--sf-shadow:0 20px 60px rgba(0,0,0,.5);--sf-on:#02060b;--sf-chip-bg:rgba(79,209,255,.12);--sf-chip-fg:#a6ecff}
+#reader.scifi.night.candle{--sf-bg:radial-gradient(ellipse 70% 60% at 50% 42%,#2a1707 0%,#120a04 55%,#080402 100%);--sf-panel:rgba(26,15,7,.95);--sf-line:rgba(227,165,72,.38);--sf-soft:rgba(227,165,72,.11);--sf-acc:#e3a548;--sf-acc2:#ffd89a;--sf-ink:#e2cca6;--sf-dim:#a8906a;--sf-glow:0 0 18px rgba(227,150,50,.38);--sf-tglow:0 0 22px rgba(227,150,50,.5);--sf-scan:rgba(0,0,0,.2);--sf-on:#120a04;--sf-chip-bg:rgba(227,165,72,.11);--sf-chip-fg:#ffd89a}
+#reader.scifi.day{--sf-bg:radial-gradient(ellipse 70% 60% at 50% 40%,#f1f7fa 0%,#dfeaf0 55%,#d6e4ec 100%);--sf-panel:rgba(251,253,254,.97);--sf-line:rgba(10,100,140,.42);--sf-soft:rgba(10,100,140,.1);--sf-acc:#0a6f94;--sf-acc2:#07506b;--sf-ink:#14313f;--sf-dim:#4a6a7b;--sf-glow:0 0 0 transparent;--sf-tglow:none;--sf-scan:rgba(10,100,140,.035);--sf-shadow:0 18px 44px rgba(20,60,85,.16);--sf-on:#fff;--sf-chip-bg:#0a6f94;--sf-chip-fg:#fff}
+/* сетка и линии развёртки на фоне */
+#reader.scifi::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(var(--sf-soft) 1px,transparent 1px),linear-gradient(90deg,var(--sf-soft) 1px,transparent 1px),repeating-linear-gradient(0deg,var(--sf-scan) 0 1px,transparent 1px 3px);
+  background-size:48px 48px,48px 48px,auto;-webkit-mask-image:radial-gradient(ellipse 85% 80% at 50% 45%,#000 25%,transparent 90%);mask-image:radial-gradient(ellipse 85% 80% at 50% 45%,#000 25%,transparent 90%)}
+/* страница-терминал с угловыми скобками */
+#reader.scifi .rcontent{position:relative;z-index:1;border-radius:0;background:var(--sf-panel);border:1px solid var(--sf-line);box-shadow:inset 0 0 40px var(--sf-soft),var(--sf-shadow)}
+#reader.scifi .rcontent::before{content:"";position:absolute;inset:-3px;pointer-events:none;
+  background:
+    linear-gradient(var(--sf-acc),var(--sf-acc)) top left/30px 4px no-repeat,linear-gradient(var(--sf-acc),var(--sf-acc)) top left/4px 30px no-repeat,
+    linear-gradient(var(--sf-acc),var(--sf-acc)) top right/30px 4px no-repeat,linear-gradient(var(--sf-acc),var(--sf-acc)) top right/4px 30px no-repeat,
+    linear-gradient(var(--sf-acc),var(--sf-acc)) bottom left/30px 4px no-repeat,linear-gradient(var(--sf-acc),var(--sf-acc)) bottom left/4px 30px no-repeat,
+    linear-gradient(var(--sf-acc),var(--sf-acc)) bottom right/30px 4px no-repeat,linear-gradient(var(--sf-acc),var(--sf-acc)) bottom right/4px 30px no-repeat;
+  filter:drop-shadow(0 0 6px var(--sf-soft))}
+#reader.scifi .reader-body::before{content:"◢  Терминал чтения // Dark Stories";display:block;margin-bottom:28px;padding-bottom:14px;border-bottom:1px solid var(--sf-line);font:500 11px/1 var(--sf-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--sf-dim)}
+/* заголовок книги слева, названия глав — справа и большими буквами */
+#reader.scifi .reader-body h1{font-family:var(--sf-head);font-weight:700;font-size:2.4rem;line-height:1.08;text-align:left;text-transform:uppercase;letter-spacing:.04em;color:var(--sf-acc2);text-shadow:var(--sf-tglow);border:0;padding:0;margin-bottom:34px}
+#reader.scifi .reader-body h1::after{content:"";display:block;height:1px;margin-top:22px;background:linear-gradient(90deg,var(--sf-acc),var(--sf-line) 40%,transparent)}
+#reader.scifi .reader-body h2,#reader.scifi .reader-body h3{position:relative;font-family:var(--sf-head);font-weight:700;text-align:right;text-transform:uppercase;letter-spacing:.06em;line-height:1.15;color:var(--sf-acc);border:0;padding:0 0 12px;margin:2em 0 .9em}
+#reader.scifi .reader-body h2{font-size:1.7em}
+#reader.scifi .reader-body h3{font-size:1.25em}
+#reader.scifi .reader-body h2::after,#reader.scifi .reader-body h3::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(270deg,var(--sf-acc),var(--sf-line) 40%,transparent)}
+#reader.scifi .reader-body h2.center,#reader.scifi .reader-body h3.center{text-align:center}
+#reader.scifi .reader-body p,#reader.scifi .reader-body li{color:var(--sf-ink)}
+#reader.scifi .reader-body blockquote{color:var(--sf-dim);border-left-color:var(--sf-acc);font-style:normal}
+#reader.scifi .reader-body hr{border-top-color:var(--sf-line)}
+/* кнопки — пунктирные кольца */
+#reader.scifi .btn.control{width:3.25rem;height:3.25rem;border-radius:50%;border:2px dashed var(--sf-acc);background:var(--sf-panel);color:var(--sf-acc)}
+#reader.scifi .btn.control:hover{background:var(--sf-acc);color:var(--sf-on);border-style:solid;box-shadow:var(--sf-glow)}
+#reader.scifi .rtime{border-radius:0;border:1px solid var(--sf-line);background:var(--sf-panel);color:var(--sf-ink);font-family:var(--sf-mono);letter-spacing:.14em}
+#reader.scifi .rnext-t,#reader.scifi .rend{color:var(--sf-acc)}
+/* окна темы и текста */
+#reader.scifi .spop{border-radius:0;border:1px solid var(--sf-line);background:var(--sf-panel);box-shadow:var(--sf-shadow)}
+#reader.scifi .sp-t{color:var(--sf-acc);font-family:var(--sf-mono);letter-spacing:.14em}
+#reader.scifi .sp-keys{color:var(--sf-dim)}
+#reader.scifi .spop input[type=range]{accent-color:var(--sf-acc)}
+#reader.scifi .chip{border-radius:0;border:1px solid var(--sf-line);background:transparent;color:var(--sf-ink);font-family:var(--sf-mono);text-transform:uppercase;letter-spacing:.08em}
+#reader.scifi .chip:hover{border-color:var(--sf-acc);color:var(--sf-acc2)}
+#reader.scifi .chip.on{background:var(--sf-chip-bg);border-color:var(--sf-acc);color:var(--sf-chip-fg);box-shadow:var(--sf-glow)}
+/* окно темы стоит под кнопкой смены темы */
+.tpop{top:4.25rem}
+@media (max-width:768px){
+  #reader.scifi .rcontent::before{inset:0}
+  #reader.scifi .reader-body h1{font-size:1.9rem}
+  #reader.scifi .reader-body h2{font-size:1.4em}
+}
+
+/* =====================================================================
+   СТИЛЬ ЧИТАЛКИ «ФЭНТЕЗИ» — пергамент, золотые рамки, иллюстрация вверху страницы.
+   Иллюстрация берётся из поля «Иллюстрация» текста (w.art); если его нет — art/fantasy.jpg.
+   В тёмных темах та же картинка перекрашивается фильтром (--fa-filter).
+   ===================================================================== */
+#reader.fantasy{--fa-head:'Cormorant Garamond',Georgia,'Times New Roman',serif;background:var(--fa-bg);background-attachment:fixed}
+#reader.fantasy.day{--fa-bg:radial-gradient(ellipse 80% 60% at 50% 25%,#3b2b1b 0%,#20160d 60%,#0f0a06 100%);--fa-panel:#ecd7a8;--fa-ink:#3a2814;--fa-title:#2a1a0b;--fa-acc:#7a2b16;--fa-gold:#97702c;--fa-line:rgba(122,84,30,.55);--fa-dim:#6b5233;--fa-on-bg:#7a2b16;--fa-on-fg:#f6e8c4;--fa-filter:none;--fa-art-op:1;--fa-shadow:0 20px 60px rgba(0,0,0,.6)}
+#reader.fantasy.night{--fa-bg:radial-gradient(ellipse 80% 60% at 50% 25%,#10203a 0%,#08101e 60%,#03060c 100%);--fa-panel:#0b1424;--fa-ink:#cdd8ee;--fa-title:#e9effc;--fa-acc:#b9caf2;--fa-gold:#8fa6d8;--fa-line:rgba(143,166,216,.4);--fa-dim:#8da1c9;--fa-on-bg:#b9caf2;--fa-on-fg:#0b1424;--fa-filter:invert(1) sepia(.55) hue-rotate(190deg) saturate(1.7) brightness(.78);--fa-art-op:.85;--fa-shadow:0 20px 60px rgba(0,0,0,.6)}
+#reader.fantasy.night.candle{--fa-bg:radial-gradient(ellipse 80% 60% at 50% 25%,#12261a 0%,#09140d 60%,#040a06 100%);--fa-panel:#0b1a11;--fa-ink:#e0d8b8;--fa-title:#f2e2a8;--fa-acc:#e3c470;--fa-gold:#c9a24f;--fa-line:rgba(201,162,79,.42);--fa-dim:#a99d76;--fa-on-bg:#e3c470;--fa-on-fg:#0b1a11;--fa-filter:invert(1) sepia(.85) hue-rotate(35deg) saturate(1.5) brightness(.72)}
+/* страница-свиток с двойной рамкой и точками в углах */
+#reader.fantasy .rcontent{position:relative;z-index:1;container-type:inline-size;border-radius:3px;background-color:var(--fa-panel);border:1px solid var(--fa-gold);box-shadow:var(--fa-shadow);outline:1px solid var(--fa-line);outline-offset:-9px;overflow:hidden;padding-top:60px}
+#reader.fantasy.day .rcontent{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .3 0 0 0 0 .14 0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),linear-gradient(#f1dfb2,#e4cb94)}
+/* иллюстрация вверху: растворяется вниз и к краям */
+#reader.fantasy .rcontent::before{content:"";position:absolute;left:0;right:0;top:0;aspect-ratio:3/1;pointer-events:none;z-index:0;
+  background:var(--art,url('../art/fantasy.jpg')) right top/100% 100% no-repeat;filter:var(--fa-filter);opacity:var(--fa-art-op);
+  -webkit-mask-image:linear-gradient(0deg,transparent 0,#000 38%),linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%);-webkit-mask-composite:source-in;
+  mask-image:linear-gradient(0deg,transparent 0,#000 38%),linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%);mask-composite:intersect}
+#reader.fantasy .rcontent::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:radial-gradient(circle,var(--fa-gold) 0 2.5px,transparent 3.5px) 5px 5px/14px 14px no-repeat,radial-gradient(circle,var(--fa-gold) 0 2.5px,transparent 3.5px) right 5px top 5px/14px 14px no-repeat,
+    radial-gradient(circle,var(--fa-gold) 0 2.5px,transparent 3.5px) left 5px bottom 5px/14px 14px no-repeat,radial-gradient(circle,var(--fa-gold) 0 2.5px,transparent 3.5px) right 5px bottom 5px/14px 14px no-repeat}
+#reader.fantasy .reader-body{position:relative;z-index:1}
+/* название слева, поверх пустой части иллюстрации; главы — по центру с ромбами */
+#reader.fantasy .reader-body h1{max-width:47%;font-family:var(--fa-head);font-weight:700;font-size:2.5rem;line-height:1.05;text-align:left;text-transform:uppercase;letter-spacing:.05em;color:var(--fa-title);border:0;padding:0;margin:0 0 0;min-height:calc(33.4cqw - 36px)}
+#reader.fantasy .reader-body h2,#reader.fantasy .reader-body h3{font-family:var(--fa-head);font-weight:700;text-align:center;text-transform:uppercase;letter-spacing:.12em;line-height:1.2;color:var(--fa-acc);border:0;padding:0;margin:1.8em 0 1em}
+#reader.fantasy .reader-body h2{font-size:1.7em}
+#reader.fantasy .reader-body h3{font-size:1.3em}
+#reader.fantasy .reader-body h2::after,#reader.fantasy .reader-body h3::after{content:"◆  ◆  ◆";display:block;margin-top:.55em;font:400 .42em/1 var(--font-sans);letter-spacing:.7em;text-indent:.7em;color:var(--fa-gold)}
+#reader.fantasy .reader-body p,#reader.fantasy .reader-body li{color:var(--fa-ink)}
+#reader.fantasy[data-font="sans"] .reader-body p,#reader.fantasy[data-font="sans"] .reader-body li,#reader.fantasy[data-font="sans"] .reader-body blockquote{font-family:'Alegreya',Georgia,'Times New Roman',serif}
+#reader.fantasy .reader-body blockquote{color:var(--fa-dim);border-left-color:var(--fa-acc)}
+#reader.fantasy .reader-body hr{border:0;height:1px;background:linear-gradient(90deg,transparent,var(--fa-gold),transparent)}
+#reader.fantasy .rbar{background:var(--fa-line)}
+#reader.fantasy .rbar i{background:var(--fa-gold)}
+#reader.fantasy .btn.control{border-radius:50%;border:1px solid var(--fa-gold);background:var(--fa-panel);color:var(--fa-acc);box-shadow:0 0 0 3px rgba(0,0,0,.18),0 0 0 4px var(--fa-line)}
+#reader.fantasy .btn.control:hover{background:var(--fa-on-bg);color:var(--fa-on-fg)}
+#reader.fantasy .rtime{border-radius:3px;border:1px solid var(--fa-gold);background:var(--fa-panel);color:var(--fa-ink);font-family:var(--fa-head);font-size:13px;font-weight:700;letter-spacing:.12em}
+#reader.fantasy .rnext-t,#reader.fantasy .rend{color:var(--fa-acc)}
+#reader.fantasy .spop{border-radius:3px;border:1px solid var(--fa-gold);outline:1px solid var(--fa-line);outline-offset:-5px;background:var(--fa-panel);box-shadow:var(--fa-shadow)}
+#reader.fantasy .sp-t{color:var(--fa-acc);font-family:var(--fa-head);font-size:14px;font-weight:700;letter-spacing:.16em}
+#reader.fantasy .sp-keys{color:var(--fa-dim)}
+#reader.fantasy .spop input[type=range]{accent-color:var(--fa-acc)}
+#reader.fantasy .chip{border-radius:2px;border:1px solid var(--fa-line);background:transparent;color:var(--fa-ink);font-family:var(--fa-head);font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+#reader.fantasy .chip:hover{border-color:var(--fa-gold);color:var(--fa-acc)}
+#reader.fantasy .chip.on{background:var(--fa-on-bg);border-color:var(--fa-on-bg);color:var(--fa-on-fg);box-shadow:none}
+@media (max-width:768px){
+  #reader.fantasy .rcontent{padding-top:50px}
+  #reader.fantasy .reader-body h1{font-size:1.65rem;min-height:calc(33.4cqw - 28px)}
+  #reader.fantasy .reader-body h2{font-size:1.4em}
+}
+
+/* =====================================================================
+   ПРОГРЕСС ЧТЕНИЯ — сам скроллбар. В стилях Sci-Fi и «Фэнтези» полоса сверху убрана (на компьютере):
+   ползунок справа и показывает, где вы в тексте. На телефоне скроллбар прозрачный, поэтому там тонкая полоса сверху остаётся.
+   ===================================================================== */
+@media (hover:hover) and (pointer:fine){
+  #reader.scifi .rbar,#reader.fantasy .rbar{display:none}
+}
+html:has(#reader.scifi.night){--sb-thumb:#4fd1ff;--sb-line:rgba(79,209,255,.35);--sb-bg:#02060b}
+html:has(#reader.scifi.night.candle){--sb-thumb:#e3a548;--sb-line:rgba(227,165,72,.4);--sb-bg:#080402}
+html:has(#reader.scifi.day){--sb-thumb:#0a6f94;--sb-line:rgba(10,100,140,.45);--sb-bg:#d6e4ec}
+html:has(#reader.fantasy.day){--sb-thumb:#97702c;--sb-line:rgba(151,112,44,.6);--sb-bg:#1d140c}
+html:has(#reader.fantasy.night){--sb-thumb:#8fa6d8;--sb-line:rgba(143,166,216,.45);--sb-bg:#08101e}
+html:has(#reader.fantasy.night.candle){--sb-thumb:#c9a24f;--sb-line:rgba(201,162,79,.45);--sb-bg:#09140d}
+html:has(#reader.scifi),html:has(#reader.fantasy){scrollbar-color:var(--sb-thumb) var(--sb-bg)}
+html:has(#reader.scifi)::-webkit-scrollbar,html:has(#reader.fantasy)::-webkit-scrollbar{width:16px;background:var(--sb-bg)}
+html:has(#reader.scifi)::-webkit-scrollbar-track,html:has(#reader.fantasy)::-webkit-scrollbar-track{background:linear-gradient(90deg,transparent 7px,var(--sb-line) 7px 8px,transparent 8px),var(--sb-bg)}
+html:has(#reader.scifi)::-webkit-scrollbar-thumb,html:has(#reader.fantasy)::-webkit-scrollbar-thumb{min-height:44px;background:var(--sb-thumb);border:4px solid transparent;background-clip:padding-box;border-radius:0}
+html:has(#reader.fantasy)::-webkit-scrollbar-thumb{border-radius:8px}
+html:has(#reader.scifi)::-webkit-scrollbar-button,html:has(#reader.fantasy)::-webkit-scrollbar-button{display:none;width:0;height:0}
