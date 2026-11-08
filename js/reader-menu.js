@@ -18,9 +18,19 @@ function showContextMenu(x, y) {
 
 document.addEventListener('contextmenu', function (e) {
   if (!R || !e.target.closest || !e.target.closest('#reader') || e.target.closest('.v3modal')) return;
-  /* на сенсорном экране не перехватываем долгое касание: пусть работает родное выделение с ручками,
-     а «Копировать / Цитата / Открытка» показывает нижняя панель (см. ниже) */
-  if (window.matchMedia && matchMedia('(hover:none)').matches) return;
+  /* телефон: вместо системной панели смартфона показываем своё меню у выделенной фразы.
+     Само выделение (слово, ручки) остаётся родным — мы его не трогаем, только читаем после небольшой паузы */
+  if (window.matchMedia && matchMedia('(hover:none)').matches) {
+    e.preventDefault();
+    setTimeout(function () {
+      var sel = window.getSelection(), txt = sel ? String(sel).trim() : '';
+      if (!txt || !sel.rangeCount) return;
+      capturedSelectionText = txt;
+      var r = sel.getRangeAt(0).getBoundingClientRect();
+      showContextMenu(r.left + r.width / 2 - 90, r.top > 210 ? r.top - 190 : r.bottom + 30);
+    }, 60);
+    return;
+  }
   e.preventDefault();
   /* выделение запоминаем сразу: после клика по меню браузер его снимет */
   capturedSelectionText = String(window.getSelection() || '').trim();
@@ -58,7 +68,7 @@ function selectAllReaderText() {
 function quoteSelection() {
   if (!capturedSelectionText || !R) return;
   var w = R.work, fullText = '«' + capturedSelectionText + '»\n— «' + w.title + '», ' + SITE.name;
-  var shareUrl = location.origin + location.pathname + '#/read/' + w.slug;
+  var shareUrl = shareUrlFor(w.slug);
   /* на телефоне — сразу системное «Поделиться» */
   if (navigator.share) { navigator.share({ text: fullText, url: shareUrl }).catch(function () {}); return; }
   openQuoteShareModal(capturedSelectionText, fullText, shareUrl);
@@ -231,7 +241,7 @@ function quoteCard() {
     var b = build();
     var sel = window.getSelection();
     var txt = sel ? String(sel).trim() : '';
-    if (R && txt && sel.rangeCount && inReader(sel)) { capturedSelectionText = txt; b.hidden = false; }
+    if (R && txt && sel.rangeCount && inReader(sel) && !contextMenuOpen()) { capturedSelectionText = txt; b.hidden = false; }
     else b.hidden = true;
   }
   document.addEventListener('selectionchange', function () { clearTimeout(timer); timer = setTimeout(update, 250); });

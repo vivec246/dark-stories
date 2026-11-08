@@ -8,6 +8,8 @@ function slugify(v) { var s = v.toLowerCase().replace(/[^a-zа-яё0-9]+/gi, '-'
 function fmtMin(m) { return (m < 1 ? 1 : m) + ' мин'; }
 function getWork(slug) { for (var i = 0; i < WORKS.length; i++) if (WORKS[i].slug === slug) return WORKS[i]; return null; }
 function byKind(k) { return WORKS.filter(function (w) { return w.kind === k; }); }
+/* ссылка, которой делятся: страница s/<slug>.html с обложкой именно этого текста (мессенджеры не читают «#») */
+function shareUrlFor(slug) { return location.origin + location.pathname.replace(/[^\/]*$/, '') + 's/' + slug + '.html'; }
 function toast(msg) {
   var t = $('#toast'); t.textContent = msg; t.classList.add('on');
   clearTimeout(toast._t); toast._t = setTimeout(function () { t.classList.remove('on'); }, 2600);

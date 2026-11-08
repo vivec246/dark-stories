@@ -40,6 +40,8 @@ function renderHeroDots() {
 function showHeroSlide(i) {
   var slides = $$('.hero .slide');
   if (!slides[i]) return;
+  /* ещё не загруженный кадр (быстрый клик по точке) грузим сразу */
+  takeSrc(slides[i]); takeSrc($$('.nav-slide')[i]);
   slides.forEach(function (s, k) { s.classList.toggle('on', k === i); });
   $$('.hero-dot').forEach(function (d, k) {
     var on = k === i;
@@ -76,7 +78,7 @@ function startHero() {
     for (var step = 1; step <= slides.length; step++) {
       var idx = (cur + step + slides.length) % slides.length;
       if (cur >= 0 && idx === cur) break;
-      if (slides[idx].complete === false) continue;
+      if (!slides[idx].getAttribute('src') || slides[idx].complete === false) continue;
       showHeroSlide(idx);
       return;
     }
@@ -162,7 +164,7 @@ function route() {
   var hadHero = !!$('.hero');
   $('#app').innerHTML = shell(path, page.render(), showHero);
   setMeta(page.title, page.desc);
-  if (showHero) { startHero(); heroFocusAll(); }
+  if (showHero) { startHero(); heroFocusAll(); loadHeroRest(); }
   if (restoreScroll !== null) { jumpTo(restoreScroll); restoreScroll = null; }
   else if (wasReader && savedScroll !== null) jumpTo(savedScroll);
   else if (hadShell && !wasReader && showHero && !hadHero) { var nv = $('#nav'); jumpTo(nv ? nv.offsetTop : 0); }

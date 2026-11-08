@@ -23,6 +23,7 @@ Object.assign(ICONS, {
   download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>',
   check: '<path d="M20 6 9 17l-5-5"/>',
   external: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
   eye: '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>',
   folder: '<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
   github: '<path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/>',
@@ -225,6 +226,13 @@ function removeFile(path) {
 function outgoing() {
   var list = [];
   if (dataChanged()) list.push({ path: 'js/data.js', type: 'text', text: serialize() });
+  /* страницы для ссылок в мессенджерах (s/<slug>.html): новые тексты и те, у кого изменилось название, описание или обложка */
+  var base = location.origin + location.pathname.replace(/[^\/]*$/, '');
+  S.WORKS.forEach(function (w) {
+    var b = null; BASE.WORKS.forEach(function (x) { if (x.slug === w.slug) b = x; });
+    if (b && b.title === w.title && b.description === w.description && b.cover === w.cover) return;
+    list.push({ path: 's/' + w.slug + '.html', type: 'text', text: sharePageHtml(w, S.SITE.name, base), share: true });
+  });
   Object.keys(files).forEach(function (p) { list.push(Object.assign({ path: p }, files[p])); });
   return list;
 }
@@ -234,7 +242,7 @@ function fileSize(f) { return f.type === 'text' ? new Blob([f.text]).size : f.ty
 function modal(o) {
   return new Promise(function (res) {
     var ov = document.createElement('div'); ov.className = 'ov';
-    ov.innerHTML = '<div class="modal' + (o.wide ? ' wide' : '') + '" role="dialog" aria-modal="true" aria-label="' + esc(o.title) + '"><h3>' + esc(o.title) + '</h3><div class="body">' + o.body + '</div><div class="foot">' +
+    ov.innerHTML = '<div class="modal' + (o.wide ? ' wide' : '') + (o.cls ? ' ' + o.cls : '') + '" role="dialog" aria-modal="true" aria-label="' + esc(o.title) + '"><h3>' + esc(o.title) + '</h3><div class="body">' + o.body + '</div><div class="foot">' +
       o.actions.map(function (a, i) { return '<button type="button" class="btn ' + (a.cls || '') + '" data-i="' + i + '">' + a.label + '</button>'; }).join('') + '</div></div>';
     var close = function (v) { ov.remove(); document.removeEventListener('keydown', key); res(v); };
     var key = function (e) { if (e.key === 'Escape') close(null); };
@@ -420,6 +428,7 @@ VIEWS.work = function (slug) {
   return { title: w.title || 'Текст', after: loadEditor, html:
     '<div class="page-h"><div><a class="eyebrow" href="#/works">← Все тексты</a><h2 id="wh">' + esc(w.title) + '</h2></div><span class="sp"></span><div class="acts">' +
     (REPO.has(w.path) ? '<a class="btn outline sm" href="index.html#/read/' + esc(w.slug) + '" target="_blank" rel="noopener">' + icon('external') + 'На сайте</a>' : '') +
+    '<button class="btn outline sm" data-act="preview">' + icon('eye') + 'Предпросмотр</button>' +
     '<button class="btn danger sm" data-act="del-work">' + icon('trash') + 'Удалить</button></div></div>' +
     '<div class="card"><div class="edit-top"><div class="cover-col"><div class="cover"><div class="ph">Нет обложки</div><img id="coverImg" src="' + esc(imgUrl(w.cover)) + '" alt="Обложка" onerror="this.style.display=\'none\'"></div>' +
     '<div style="display:grid;gap:.5rem;align-content:start"><button class="btn outline sm" data-act="cover-pick">' + icon('upload') + 'Обложка</button><input type="file" accept="image/*" data-file="cover" hidden><p class="small muted">3:4, лучше от 600×800</p></div></div>' +
@@ -556,7 +565,9 @@ VIEWS.site = function () {
     '<div class="card"><h2>Связь и ссылки</h2><p class="lead">Показываются на страницах «Связь» и «Донат».</p><div class="grid g2">' +
     field('Почта', 'site:email', s.email, { type: 'email' }) + field('Год в подвале', 'site:year', s.year, { attrs: ' inputmode="numeric"' }) +
     field('Telegram — ссылка', 'site:telegram', s.telegram, { type: 'url' }) + field('Telegram — как показывать', 'site:telegramHandle', s.telegramHandle) +
-    field('Дзен — ссылка', 'site:dzen', s.dzen, { type: 'url' }) + field('Дзен — как показывать', 'site:dzenHandle', s.dzenHandle) + '</div></div>' };
+    field('Дзен — ссылка', 'site:dzen', s.dzen, { type: 'url' }) + field('Дзен — как показывать', 'site:dzenHandle', s.dzenHandle) + '</div></div>' +
+    '<div class="card"><h2>Статистика</h2><p class="lead">Яндекс Метрика показывает, какие рассказы открывают и дочитывают. Вставьте номер счётчика (только цифры) — пусто значит, что статистика выключена. Политика конфиденциальности на сайте уже описывает, что собирается.</p><div class="grid g2">' +
+    field('Номер счётчика Яндекс Метрики', 'site:metrikaId', s.metrikaId || '', { attrs: ' inputmode="numeric" placeholder="например 12345678"' }) + '</div></div>' };
 };
 
 /* —— Публикация —— */
@@ -569,7 +580,7 @@ VIEWS.publish = function () {
   var dirOk = typeof window.showDirectoryPicker === 'function';
   var changes = !list.length ? '<div class="empty">Изменений нет. Правьте тексты, новости и шапку — здесь появится список.</div>' :
     '<ul class="chg">' + list.map(function (f) {
-      var lab = f.path === 'js/data.js' ? 'Данные сайта' : f.type === 'del' ? 'Удаление' : f.type === 'bin' ? 'Картинка' : (REPO.has(f.path) ? 'Текст' : 'Новый файл');
+      var lab = f.path === 'js/data.js' ? 'Данные сайта' : f.share ? 'Страница для ссылок' : f.type === 'del' ? 'Удаление' : f.type === 'bin' ? 'Картинка' : (REPO.has(f.path) ? 'Текст' : 'Новый файл');
       return '<li><span class="badge ' + (f.type === 'del' ? 'del' : 'acc') + '">' + lab + '</span><span class="p">' + esc(f.path) + '</span><span class="sz">' + (f.type === 'del' ? '' : fmtSize(fileSize(f))) + '</span></li>';
     }).join('') + '</ul>' + (sum.length ? '<ul class="steps" style="list-style:disc;margin-top:.9rem">' + sum.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>' : '');
   var probs = v.errs.map(function (x) { return '<div class="prob err"><span>' + esc(x.t) + ' <a href="' + x.at + '">Исправить</a></span></div>'; }).concat(v.warns.map(function (x) { return '<div class="prob warn"><span>' + esc(x.t) + ' <a href="' + x.at + '">Открыть</a></span></div>'; })).join('');
@@ -749,6 +760,28 @@ function onBind(el) {
 }
 
 var ACT = {
+  /* предпросмотр: настоящая читалка сайта в окне, с ещё не опубликованным текстом, стилем и обложкой */
+  'preview': async function () {
+    var w = curWork(); if (!w) return;
+    var d = clone(S);
+    d.WORKS.forEach(function (x) { if (URLS[x.cover]) x.cover = URLS[x.cover]; if (x.art && URLS[x.art]) x.art = URLS[x.art]; });
+    window.__DS_PREVIEW = { SITE: d.SITE, WORKS: d.WORKS, texts: Object.assign({}, texts) };
+    await modal({
+      title: 'Предпросмотр: ' + (w.title || 'без названия'), wide: true, cls: 'pv',
+      body: '<div class="pvbar"><button type="button" class="btn outline sm on" data-dev="phone">Телефон</button><button type="button" class="btn outline sm" data-dev="pc">Компьютер</button>' +
+        '<span class="small muted">Это настоящая читалка. Тему, шрифт и стиль можно переключать как у читателя.</span></div>' +
+        '<div class="pvwrap phone"><iframe class="pvframe" title="Предпросмотр" src="index.html#/read/' + encodeURIComponent(w.slug) + '"></iframe></div>',
+      actions: [{ label: 'Закрыть', cls: 'ghost', value: null }],
+      onOpen: function (ov) {
+        ov.querySelector('.pvbar').addEventListener('click', function (e) {
+          var b = e.target.closest('[data-dev]'); if (!b) return;
+          ov.querySelectorAll('[data-dev]').forEach(function (x) { x.classList.toggle('on', x === b); });
+          ov.querySelector('.pvwrap').className = 'pvwrap ' + b.getAttribute('data-dev');
+        });
+      }
+    });
+    delete window.__DS_PREVIEW;
+  },
   'new-work': async function () {
     var autoSlug = true;
     var r = await modal({

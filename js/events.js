@@ -110,7 +110,7 @@ document.addEventListener('click', function (e) {
     else if (act === 'toc') openDialog('toc');
     else if (act === 'font') { var fp = $('#fontpop'), tp1 = $('#themepop'); if (tp1) tp1.hidden = true; fp.hidden = !fp.hidden; }
     else if (act === 'share') {
-      var url = location.origin + location.pathname + '#/read/' + w.slug;
+      var url = shareUrlFor(w.slug);
       if (navigator.share) navigator.share({ title: w.title, url: url }).catch(function () {});
       else copyText(url).then(function () { toast('Ссылка скопирована — можно отправлять'); }).catch(function () { toast(url); });
     }

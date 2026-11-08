@@ -7,7 +7,8 @@ var SITE = {
   email: 'lancev.dmitrij.avtor@gmail.com',
   telegram: 'https://t.me/lancev_dark', telegramHandle: '@lancev_dark',
   dzen: 'https://dzen.ru/slovo_lanceva', dzenHandle: 'slovo_lanceva',
-  year: 2026, version: '4.0'
+  year: 2026, version: '4.0',
+  metrikaId: '108542095', metrikaWebvisor: true,   /* номер счётчика Яндекс Метрики; пусто — статистика выключена. Задаётся в админке: Сайт → Статистика */
 };
 var HERO = ['cap/header_1.jpg','cap/header_2.jpg','cap/header_3.jpg','cap/header_4.jpg','cap/header_5.jpg','cap/header_6.jpg','cap/header_7.jpg'];
 /* Где в картинке главный объект (число — процент от ширины картинки: 0 — левый край, 50 — середина, 100 — правый).
