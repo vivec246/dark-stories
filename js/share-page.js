@@ -4,7 +4,7 @@
 function sharePageHtml(w, siteName, base) {
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   var url = base + 's/' + w.slug + '.html';
-  var img = base + (w.cover || 'cap/header_1.jpg');
+  var img = base + 's/' + w.slug + '.jpg';   /* карточка-«книга» или «газета», её рисует админка */
   var title = w.title + ' — ' + siteName;
   var desc = w.description || '';
   var go = '../#/read/' + w.slug;

@@ -10,17 +10,19 @@ var TRASH = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><polyline p
 
 /* темы, шрифт, ширина строки, интервал */
 var THEMES = ['night', 'day', 'candle'];
-var THEME_NAMES = { night: 'Ночь', day: 'День', candle: 'Свеча' };
+var THEME_NAMES = { night: 'Ночь', day: 'День', candle: 'Тёплый' };
 /* стиль оформления читалки: «Стандартная» и «Sci-Fi» (терминал будущего). Какой стиль у текста — задаётся в админке (readerStyle, readerStyleChoice) */
 var STYLES = [['standard', 'Стандартная'], ['scifi', 'Sci-Fi'], ['fantasy', 'Фэнтези']];
 function styleName(id) { for (var i = 0; i < STYLES.length; i++) if (STYLES[i][0] === id) return STYLES[i][1]; return id; }
 /* какие стили предложены читателю: «Стандартная» и стиль текста (если автор включил выбор) */
 function styleOptions(w) {
+  if (w && w.kind === 'article') return ['gazette'];   /* статьи всегда в газетном стиле, выбора нет */
   var def = w && (w.readerStyle === 'scifi' || w.readerStyle === 'fantasy') ? w.readerStyle : 'standard';
   return def !== 'standard' && w.readerStyleChoice ? ['standard', def] : [def];
 }
 function workStyle(w) {
   if (!w) return 'standard';
+  if (w.kind === 'article') return 'gazette';
   var def = w.readerStyle === 'scifi' || w.readerStyle === 'fantasy' ? w.readerStyle : 'standard';
   var opts = styleOptions(w);
   if (opts.length < 2) return def;
@@ -30,7 +32,7 @@ function workStyle(w) {
 /* шрифты для Sci-Fi подгружаем только тогда, когда стиль реально нужен */
 function ensureStyleFonts(style) {
   var id = 'fonts-' + style;
-  if (style === 'standard' || document.getElementById(id)) return;
+  if (style === 'standard' || style === 'gazette' || document.getElementById(id)) return;
   var l = document.createElement('link'); l.id = id; l.rel = 'stylesheet';
   l.href = style === 'scifi'
     ? 'https://fonts.googleapis.com/css2?family=Tektur:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap'
@@ -59,7 +61,7 @@ function readerClass(w) {
   var t = Store.s.readerTheme;
   return 'reader ' + (t === 'day' ? 'day' : 'night' + (t === 'candle' ? ' candle' : '')) + (workStyle(w) !== 'standard' ? ' ' + workStyle(w) : '');
 }
-/* окно под кнопкой смены темы: Ночь / День / Свеча, а ниже — стиль (если у текста их несколько) */
+/* окно под кнопкой смены темы: Ночь / День / Тёплый, а ниже — стиль (если у текста их несколько) */
 function themePanelHtml(w) {
   var h = '<div class="spop tpop" id="themepop" hidden><div class="sp-sec"><div class="sp-t">Тема</div><div class="sp-chips">' +
     chipsHtml('readerTheme', THEMES.map(function (t) { return [t, THEME_NAMES[t]]; })) + '</div></div>';
@@ -77,6 +79,7 @@ function readerShell(w) {
   ensureStyleFonts(workStyle(w));
   return '<div class="' + readerClass(w) + '" id="reader"' + (w.art ? ' style="--art:url(\'' + esc(w.art) + '\')"' : '') + ' data-font="' + S.readerFont + '" data-width="' + S.readerWidth + '" data-lead="' + S.readerLead + '">' +
     '<div class="rbar" aria-hidden="true"><i id="rbar"></i></div>' +
+    '<div class="rscroll" id="rscroll" aria-hidden="true"><i></i></div>' +
     '<div class="rtools" id="rtools">' +
     '<button type="button" class="btn control" data-act="close" aria-label="Закрыть читалку">' + icon('back') + '</button>' +
     '<button type="button" class="btn control" data-act="theme" aria-label="Сменить тему">' + icon('moon') + '</button>' +
@@ -99,6 +102,7 @@ function applyReaderPrefs() {
   var st = workStyle(R && R.work);
   rd.classList.toggle('scifi', st === 'scifi');
   rd.classList.toggle('fantasy', st === 'fantasy');
+  rd.classList.toggle('gazette', st === 'gazette');
   ensureStyleFonts(st);
   rd.setAttribute('data-font', S.readerFont);
   rd.setAttribute('data-width', S.readerWidth);
@@ -207,15 +211,49 @@ function textMax() {
   var end = body.getBoundingClientRect().bottom + el.scrollTop + 40;
   return Math.max(1, Math.min(full, end - el.clientHeight));
 }
+/* СКРОЛЛБАР НА ТЕЛЕФОНЕ: тонкий ползунок у правого края. Показывается при прокрутке, его можно взять пальцем и тянуть. */
+var rsTimer = null, rsDrag = false;
+function rsGeom() {
+  var tr = $('#rscroll'); if (!tr) return null;
+  var th = tr.firstElementChild, h = tr.clientHeight, ratio = window.innerHeight / Math.max(window.innerHeight, textMax() + window.innerHeight);
+  var tH = Math.max(46, Math.min(h * 0.5, h * ratio * 6));
+  return { tr: tr, th: th, h: h, tH: tH };
+}
+function placeRScroll(frac) {
+  var g = rsGeom(); if (!g || g.h === 0) return;
+  g.th.style.height = g.tH + 'px';
+  g.th.style.transform = 'translateY(' + (frac * (g.h - g.tH)).toFixed(1) + 'px)';
+  g.tr.classList.add('on');
+  clearTimeout(rsTimer);
+  if (!rsDrag) rsTimer = setTimeout(function () { var t = $('#rscroll'); if (t) t.classList.remove('on'); }, 1300);
+}
+function bindRScroll() {
+  var tr = $('#rscroll'); if (!tr) return;
+  function jump(e) {
+    var g = rsGeom(); if (!g) return;
+    var y = e.clientY - g.tr.getBoundingClientRect().top - g.tH / 2;
+    var frac = Math.min(1, Math.max(0, y / Math.max(1, g.h - g.tH)));
+    window.scrollTo({ top: frac * textMax(), behavior: 'instant' });   /* instant: на странице включена плавная прокрутка */
+  }
+  tr.addEventListener('pointerdown', function (e) {
+    rsDrag = true; tr.classList.add('on', 'drag'); clearTimeout(rsTimer);
+    try { tr.setPointerCapture(e.pointerId); } catch (x) {}
+    jump(e); e.preventDefault();
+  });
+  tr.addEventListener('pointermove', function (e) { if (rsDrag) { jump(e); e.preventDefault(); } });
+  function end() { if (!rsDrag) return; rsDrag = false; tr.classList.remove('drag'); rsTimer = setTimeout(function () { tr.classList.remove('on'); }, 1300); }
+  tr.addEventListener('pointerup', end); tr.addEventListener('pointercancel', end);
+}
 function updateProgressBar() {
   var el = document.documentElement, max = textMax();
   var frac = Math.min(1, el.scrollTop / max);
   var pct = max > 1 ? Math.round(frac * 100) : 0;
   var bar = $('#rbar'); if (bar) bar.style.width = pct + '%';
+  placeRScroll(frac);
   var rt = $('#rtime');
   if (rt && R && R.words) {
     var left = Math.round(R.words / 190 * (1 - frac));   /* ~190 слов в минуту */
-    rt.textContent = frac >= 0.985 ? 'дочитано' : left < 1 ? 'меньше минуты' : 'осталось ~' + left + ' мин';
+    rt.textContent = frac >= 0.985 ? 'дочитано' : left < 1 ? 'меньше минуты' : 'осталось ' + left + ' мин';
   }
   return pct;
 }
@@ -246,9 +284,13 @@ function openDialog(kind) {
       '</div><div class="modal-actions"><button type="button" class="btn outline" data-act="bm-save">+ Сохранить позицию</button></div>';
   }
   R.dialog = kind;
-  $('#overlay-root').innerHTML = modalHtml(body);
+  var ov = $('#overlay-root');
+  ov.innerHTML = modalHtml(body);
+  /* окна содержания и закладок одеваются в стиль и тему читалки (scifi/fantasy/gazette + day/night/candle) */
+  var rd = $('#reader');
+  ov.className = rd ? ['scifi', 'fantasy', 'gazette', 'day', 'night', 'candle'].filter(function (c) { return rd.classList.contains(c); }).join(' ') : '';
 }
-function closeDialog() { $('#overlay-root').innerHTML = ''; if (R) R.dialog = null; }
+function closeDialog() { $('#overlay-root').innerHTML = ''; $('#overlay-root').className = ''; if (R) R.dialog = null; }
 
 function openReader(path, params) {
   var slug = path.slice('/read/'.length), w = getWork(slug);
@@ -258,6 +300,7 @@ function openReader(path, params) {
   Store.addRecent(w.slug);
   $('#app').innerHTML = readerShell(w);
   playOpenFx(w);
+  bindRScroll();
   setMeta(w.title + ' — ' + SITE.name, w.description, w.cover);
   $('#ldWork').textContent = JSON.stringify({ '@context': 'https://schema.org', '@type': w.kind === 'article' ? 'Article' : 'Book', name: w.title, headline: w.title, description: w.description, datePublished: w.year + '-01-01', inLanguage: 'ru', image: w.cover, author: { '@type': 'Person', name: SITE.author }, isAccessibleForFree: true });
   var token = R;

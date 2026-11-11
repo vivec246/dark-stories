@@ -222,6 +222,16 @@ function removeFile(path) {
   delete texts[path]; delete origTexts[path];
 }
 
+/* картинки-карточки для шаринга: рисуются заранее (async), а outgoing() только берёт готовые */
+var shareImgs = {};
+function shareSig(w) { return [w.slug, w.title, w.genre, w.age, w.year, w.kind, w.cover, (files[w.cover] && files[w.cover].blob ? files[w.cover].blob.size : '')].join('|'); }
+async function buildShareImages() {
+  for (var i = 0; i < S.WORKS.length; i++) {
+    var w = S.WORKS[i], k = shareSig(w);
+    if (shareImgs[k]) continue;
+    try { shareImgs[k] = await shareImageBlob(w, imgUrl(w.cover), S.SITE.name); } catch (e) {}
+  }
+}
 /* список файлов к отправке (data.js собирается из рабочей копии) */
 function outgoing() {
   var list = [];
@@ -230,8 +240,10 @@ function outgoing() {
   var base = location.origin + location.pathname.replace(/[^\/]*$/, '');
   S.WORKS.forEach(function (w) {
     var b = null; BASE.WORKS.forEach(function (x) { if (x.slug === w.slug) b = x; });
-    if (b && b.title === w.title && b.description === w.description && b.cover === w.cover) return;
+    if (b && b.title === w.title && b.description === w.description && b.cover === w.cover && b.genre === w.genre && b.age === w.age && b.year === w.year && b.kind === w.kind) return;
     list.push({ path: 's/' + w.slug + '.html', type: 'text', text: sharePageHtml(w, S.SITE.name, base), share: true });
+    var im = shareImgs[shareSig(w)];
+    if (im) list.push({ path: 's/' + w.slug + '.jpg', type: 'bin', blob: im, share: true });
   });
   Object.keys(files).forEach(function (p) { list.push(Object.assign({ path: p }, files[p])); });
   return list;
@@ -410,7 +422,7 @@ function editorHtml(w, t) {
   return '<div class="tb"' + (prev ? ' style="display:none"' : '') + ' id="tb">' +
     '<button type="button" data-act="md" data-m="h2" title="Заголовок раздела">H2</button><button type="button" data-act="md" data-m="h3" title="Подзаголовок">H3</button><span class="sep"></span>' +
     '<button type="button" data-act="md" data-m="b" title="Жирный (Ctrl+B)"><b>Ж</b></button><button type="button" data-act="md" data-m="i" title="Курсив (Ctrl+I)"><i>К</i></button><span class="sep"></span>' +
-    '<button type="button" data-act="md" data-m="q" title="Цитата">❝</button><button type="button" data-act="md" data-m="c" title="По центру">⟷</button><button type="button" data-act="md" data-m="hr" title="Разделитель">—</button></div>' +
+    '<button type="button" data-act="md" data-m="q" title="Цитата">❝</button><button type="button" data-act="md" data-m="c" title="По центру">⟷</button><button type="button" data-act="md" data-m="hr" title="Разделитель">—</button><span class="sep"></span><button type="button" data-act="md" data-m="link" title="Ссылка (Ctrl+K): [текст](адрес)">🔗</button><button type="button" data-act="md" data-m="para" title="Разделить строки на абзацы (всё или выделенное)">¶</button></div>' +
     (prev ? '<div class="prev" id="prev"></div>' : '<textarea class="ta ed" id="ed" spellcheck="true" aria-label="Текст"></textarea>') +
     '<div class="counts" id="counts"></div>';
 }
@@ -444,15 +456,15 @@ VIEWS.work = function (slug) {
     '<div class="f"><label for="f_work_minutes">Время чтения, минут</label><div class="in-row"><input class="in" id="f_work_minutes" data-bind="work:minutes" type="number" min="1" value="' + esc(w.minutes) + '"><button type="button" class="btn ghost sm" style="height:auto" data-act="calc-min">По тексту</button></div></div>' +
     field('Адрес', 'work:slug', w.slug, { ro: true, hint: 'index.html#/read/' + esc(w.slug) + ' · после создания не меняется — по нему хранятся закладки читателей' }) +
     '</div></div><datalist id="genres">' + genres.map(function (g) { return '<option value="' + esc(g) + '">'; }).join('') + '</datalist></div>' +
-    '<div class="card"><h2>Стиль читалки</h2><p class="lead">Как выглядит страница чтения. «Sci-Fi» — терминал будущего (названия глав справа, большими буквами). «Фэнтези» — пергамент, золотые рамки и иллюстрация вверху. Оба стиля работают в темах «Ночь», «День» и «Свеча».</p><div class="grid g2">' +
+    '<div class="card"><h2>Стиль читалки</h2><p class="lead">Как выглядит страница чтения. «Sci-Fi» — терминал будущего (названия глав справа, большими буквами). «Фэнтези» — пергамент, золотые рамки и иллюстрация вверху. Оба стиля работают в темах «Ночь», «День» и «Тёплый».</p><div class="grid g2">' +
     field('Стиль по умолчанию', 'work:readerStyle', w.readerStyle || 'standard', { options: [['standard', 'Стандартная'], ['scifi', 'Sci-Fi (терминал будущего)'], ['fantasy', 'Фэнтези (пергамент)']] }) +
-    '<div class="f"><label>Выбор читателя</label><label class="check" style="padding:.75rem 0' + (!w.readerStyle || w.readerStyle === 'standard' ? ';opacity:.5' : '') + '"><input type="checkbox" data-bind="work:readerStyleChoice"' + (w.readerStyleChoice ? ' checked' : '') + (!w.readerStyle || w.readerStyle === 'standard' ? ' disabled' : '') + '> Показывать переключатель стиля в окне смены темы</label><small>Читатель увидит под «Ночь / День / Свеча» кнопки «Стандартная» и выбранный вами стиль, его выбор запомнится.</small></div>' +
+    '<div class="f"><label>Выбор читателя</label><label class="check" style="padding:.75rem 0' + (!w.readerStyle || w.readerStyle === 'standard' ? ';opacity:.5' : '') + '"><input type="checkbox" data-bind="work:readerStyleChoice"' + (w.readerStyleChoice ? ' checked' : '') + (!w.readerStyle || w.readerStyle === 'standard' ? ' disabled' : '') + '> Показывать переключатель стиля в окне смены темы</label><small>Читатель увидит под «Ночь / День / Тёплый» кнопки «Стандартная» и выбранный вами стиль, его выбор запомнится.</small></div>' +
     (w.readerStyle === 'fantasy' ? '<div class="f" style="grid-column:1/-1"><label>Иллюстрация вверху страницы</label><div class="hero-pic" style="max-width:520px"><img id="artImg" src="' + esc(imgUrl(w.art || 'art/fantasy.jpg')) + '" alt="" onerror="this.style.display=\'none\'"></div><div class="acts" style="margin-top:.6rem"><button class="btn outline sm" data-act="art-pick">' + icon('upload') + 'Загрузить иллюстрацию</button><input type="file" accept="image/*" data-file="art" hidden>' + (w.art ? '<button class="btn ghost sm" data-act="art-del">Вернуть стандартную</button>' : '') + '</div><small>Широкая картинка 3:1 (например, 2100×700): главный объект справа, слева — пустое место под название. Внизу и по краям она плавно растворяется. В тёмных темах цвета подстраиваются сами. Без загрузки показывается картинка по умолчанию.</small></div>' : '') + '</div></div>' +
     (w.kind === 'story' || (w.cycle && w.cycle.length) ? '<div class="card"><div class="card-h"><h2>Части цикла</h2><button class="btn ghost sm" data-act="cycle-from-h">Взять из заголовков ##</button></div><p class="lead">Если рассказ — цикл из нескольких частей, перечислите их по одной на строку (как в тексте). Иначе оставьте пустым.</p>' +
       '<textarea class="ta" id="f_work_cycleText" data-bind="work:cycleText" rows="4" placeholder="Сказ первый. Глина">' + esc((w.cycle || []).join('\n')) + '</textarea></div>' : '') +
     '<div class="card"><div class="card-h"><h2>Текст</h2><div class="seg" role="tablist"><button type="button" data-act="ed-tab" data-v="edit" class="' + (UI.tab === 'edit' ? 'on' : '') + '">' + icon('pen') + 'Редактор</button><button type="button" data-act="ed-tab" data-v="prev" class="' + (UI.tab === 'prev' ? 'on' : '') + '">' + icon('eye') + 'Просмотр</button></div>' +
     '<button class="btn ghost sm" data-act="txt-pick">' + icon('upload') + 'Загрузить .md</button><input type="file" accept=".md,.txt,text/plain,text/markdown" data-file="txt" hidden></div>' +
-    '<p class="small muted" style="margin-bottom:.9rem">Файл <code>' + esc(w.path) + '</code>. Разметка как на сайте: <code>## Глава</code>, <code>**жирный**</code>, <code>*курсив*</code>, <code>&gt; цитата</code>, <code>---</code> разделитель, <code>&lt;center&gt;…&lt;/center&gt;</code> по центру.</p>' +
+    '<p class="small muted" style="margin-bottom:.9rem">Файл <code>' + esc(w.path) + '</code>. Разметка как на сайте: <code>## Глава</code>, <code>**жирный**</code>, <code>*курсив*</code>, <code>[текст](https://адрес)</code> ссылка, <code>&gt; цитата</code>, <code>---</code> разделитель, <code>&lt;center&gt;…&lt;/center&gt;</code> по центру.</p>' +
     '<div id="edWrap"><p class="muted">Загрузка текста…</p></div></div>' };
 };
 async function loadEditor() {
@@ -490,9 +502,36 @@ function insertAt(s, e, text) {
   var t = document.getElementById('ed'); t.focus(); t.setSelectionRange(s, e);
   if (!document.execCommand('insertText', false, text)) { t.setRangeText(text, s, e, 'end'); t.dispatchEvent(new Event('input', { bubbles: true })); }
 }
+/* Абзацы: в Google Docs и Word абзац — это просто перевод строки, а в Markdown абзацы разделяет пустая строка.
+   Эта функция расставляет пустые строки между строками (списки «- … / 1. …» остаются списками). */
+function normalizeParas(text) {
+  var out = [], prev = '';
+  text.replace(/\r\n?/g, '\n').split('\n').forEach(function (raw) {
+    var l = raw.replace(/\s+$/, ''); if (!l.trim()) return;
+    var item = /^\s*([-*+]|\d+\.)\s+/;
+    out.push(prev && item.test(prev) && item.test(l) ? '\n' + l : (prev ? '\n\n' + l : l));
+    prev = l;
+  });
+  return out.join('').replace(/\n\n\n/g, '\n\n');
+}
 function mdAction(m) {
   var t = document.getElementById('ed'); if (!t) return;
   var s = t.selectionStart, e = t.selectionEnd, v = t.value, sel = v.slice(s, e);
+  if (m === 'para') {
+    /* без выделения — весь текст, с выделением — только выбранное */
+    if (e > s) insertAt(s, e, normalizeParas(sel));
+    else { insertAt(0, v.length, normalizeParas(v)); }
+    toast('Абзацы разделены пустыми строками');
+    return;
+  }
+  if (m === 'link') {
+    var lt = sel || 'текст', isUrl = /^(https?:\/\/|www\.)\S+$/i.test(sel);
+    var url = isUrl ? sel : 'https://', label = isUrl ? 'ссылка' : lt;
+    insertAt(s, e, '[' + label + '](' + url + ')');
+    if (isUrl) t.setSelectionRange(s + 1, s + 1 + label.length);
+    else t.setSelectionRange(s + label.length + 3, s + label.length + 3 + url.length);
+    return;
+  }
   if (m === 'b' || m === 'i' || m === 'c') {
     var a = m === 'b' ? '**' : m === 'i' ? '*' : '<center>', b = m === 'b' ? '**' : m === 'i' ? '*' : '</center>';
     insertAt(s, e, a + (sel || 'текст') + b);
@@ -654,6 +693,7 @@ async function ghTest() {
   logLine('✓ Ветка «' + c.branch + '» на месте. Можно публиковать.', 'o');
 }
 async function ghPublish() {
+  await buildShareImages();
   var c = ghCheckFields(), list = outgoing(), pre = c.prefix ? c.prefix + '/' : '';
   var br = c.branch.split('/').map(encodeURIComponent).join('/');
   var msg = (CONN.gh.msg || '').trim() || ('Админка: ' + (summary().slice(0, 3).join('; ') || 'обновление файлов'));
@@ -690,6 +730,7 @@ async function dirPick() {
   render();
 }
 async function dirWrite() {
+  await buildShareImages();
   var list = outgoing(); if (!CONN.dir) throw new Error('Сначала выберите папку сайта.');
   for (var i = 0; i < list.length; i++) {
     var f = list[i], parts = splitPath(f.path), name = parts.pop();
@@ -715,7 +756,7 @@ function loadJSZip() {
   });
 }
 async function zipDl() {
-  await loadJSZip();
+  await loadJSZip(); await buildShareImages();
   var list = outgoing(), z = new JSZip(), del = [];
   list.forEach(function (f) { if (f.type === 'del') del.push(f.path); else z.file(f.path, f.type === 'text' ? f.text : f.blob); });
   if (del.length) z.file('_УДАЛИТЬ.txt', 'Эти файлы нужно удалить из папки сайта:\n\n' + del.join('\n') + '\n');
@@ -905,6 +946,14 @@ function bindEvents() {
     if (a) { e.preventDefault(); if (ACT[a.dataset.act]) ACT[a.dataset.act](a); return; }
     var r = e.target.closest('.row[data-href]'); if (r && !e.target.closest('button,a')) location.hash = r.dataset.href;
   });
+  /* вставка в редактор из Google Docs / Word: каждая строка — абзац */
+  document.addEventListener('paste', function (e) {
+    var t = e.target; if (!t || t.id !== 'ed') return;
+    var txt = (e.clipboardData || window.clipboardData).getData('text/plain');
+    if (!txt || txt.indexOf('\n') < 0) return;
+    e.preventDefault();
+    insertAt(t.selectionStart, t.selectionEnd, normalizeParas(txt));
+  });
   document.addEventListener('input', function (e) {
     var t = e.target;
     if (t.id === 'ed') { var w = curWork(); if (w) { setText(w.path, t.value); updCounts(); } return; }
@@ -918,7 +967,7 @@ function bindEvents() {
   });
   document.addEventListener('keydown', function (e) {
     if (e.target.id === 'ed' && (e.ctrlKey || e.metaKey)) {
-      if (e.code === 'KeyB') { e.preventDefault(); mdAction('b'); } else if (e.code === 'KeyI') { e.preventDefault(); mdAction('i'); }
+      if (e.code === 'KeyB') { e.preventDefault(); mdAction('b'); } else if (e.code === 'KeyI') { e.preventDefault(); mdAction('i'); } else if (e.code === 'KeyK') { e.preventDefault(); mdAction('link'); } else if (e.code === 'KeyK') { e.preventDefault(); mdAction('link'); }
     }
     if (e.target.id === 'ed' && e.key === 'Tab') { e.preventDefault(); var t = e.target; insertAt(t.selectionStart, t.selectionEnd, '  '); }
   });

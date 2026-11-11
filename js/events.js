@@ -345,6 +345,9 @@ document.addEventListener('pointerout', function (e) {
     if (!mobile()) return;
     var open = anyOpen();
     if (open && !marked) {
+      /* пока в истории лежит служебная запись, браузер не должен «восстанавливать» прокрутку при возврате назад:
+         иначе он откатывает страницу туда, где вы были до перехода по главе или закладке */
+      try { history.scrollRestoration = 'manual'; } catch (e) {}
       history.pushState({ dsModal: 1 }, '', location.href); marked = true;
     } else if (!open && marked) {
       marked = false;
@@ -352,6 +355,7 @@ document.addEventListener('pointerout', function (e) {
     }
   }
   window.addEventListener('popstate', function () {
+    setTimeout(function () { try { history.scrollRestoration = 'auto'; } catch (e) {} }, 600);
     if (ownBack) { ownBack = false; return; }
     if (marked) { marked = false; closeAll(); }
   });

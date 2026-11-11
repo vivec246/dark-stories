@@ -114,7 +114,6 @@ function bookHtml(w) {
       /* корешок */
       '<div class="bk-face bk-spine">' +
         '<div class="bk-spine-bg" style="' + bg + '"></div>' +
-        (pct >= 1 ? '<div class="bk-prog"><i style="height:' + pct + '%"></i></div>' : '') +
         (pct >= 1 && pct < 100 ? '<div class="bk-ribbon"></div>' : '') +
         '<span class="bk-year">' + esc(w.year) + '</span><span class="bk-orn"></span>' +
         '<div class="bk-title-wrap"><div class="bk-title" style="font-size:' + fs + 'px">' + esc(w.shortTitle) + '</div></div>' +

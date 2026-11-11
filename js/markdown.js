@@ -27,7 +27,7 @@ function parseMd(md) {
   return blocks;
 }
 function stripMd(md) {
-  return md.replace(/^#{1,3}\s+/gm, '').replace(/^>\s+/gm, '').replace(/[*_]{1,2}([^*_]+)[*_]{1,2}/g, '$1').replace(/<\/?center>/gi, '').replace(/^---$/gm, '').replace(/\s+/g, ' ').trim();
+  return md.replace(/\[([^\]]+)\]\([^)\s]+\)/g, '$1').replace(/^#{1,3}\s+/gm, '').replace(/^>\s+/gm, '').replace(/[*_]{1,2}([^*_]+)[*_]{1,2}/g, '$1').replace(/<\/?center>/gi, '').replace(/^---$/gm, '').replace(/\s+/g, ' ').trim();
 }
 function excerpt(text, q, radius) {
   radius = radius || 72;
@@ -43,12 +43,28 @@ function hl(text, q) {
     return c.toLowerCase() === q.toLowerCase() ? '<mark>' + esc(c) + '</mark>' : esc(c);
   }).join('');
 }
+/* ссылка допустима, только если это http(s), почта, телефон или переход внутри сайта (#/...) */
+function safeHref(u) {
+  u = String(u || '').trim();
+  if (/^(https?:\/\/|mailto:|tel:|#\/)/i.test(u)) return u;
+  if (/^www\./i.test(u)) return 'https://' + u;
+  return '';
+}
+function linkHtml(label, url, q) {
+  var h = safeHref(url);
+  if (!h) return hl(label, q);
+  var ext = /^(https?:)?\/\//i.test(h);
+  return '<a class="md-link" href="' + esc(h) + '"' + (ext ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' + hl(label, q) + '</a>';
+}
 function rich(text, q) {
-  var out = '', re = /(\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*)/g, last = 0, m;
+  var out = '', re = /(\[[^\]]+\]\([^)\s]+\)|https?:\/\/[^\s<>"')\]]+|\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*)/g, last = 0, m;
   while ((m = re.exec(text))) {
     if (m.index > last) out += hl(text.slice(last, m.index), q);
-    out += (m[0].indexOf('**') === 0 || m[0].indexOf('__') === 0) ? '<strong>' + hl(m[0].slice(2, -2), q) + '</strong>' : '<em>' + hl(m[0].slice(1, -1), q) + '</em>';
-    last = m.index + m[0].length;
+    var t = m[0], lm;
+    if (t.charAt(0) === '[' && (lm = t.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/))) out += linkHtml(lm[1], lm[2], q);
+    else if (/^https?:/i.test(t)) { var tail = t.match(/[.,;:!?]+$/); var core = tail ? t.slice(0, -tail[0].length) : t; out += linkHtml(core, core, q) + (tail ? hl(tail[0], q) : ''); }
+    else out += (t.indexOf('**') === 0 || t.indexOf('__') === 0) ? '<strong>' + hl(t.slice(2, -2), q) + '</strong>' : '<em>' + hl(t.slice(1, -1), q) + '</em>';
+    last = m.index + t.length;
   }
   if (last < text.length) out += hl(text.slice(last), q);
   return out;

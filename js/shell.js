@@ -53,6 +53,24 @@ function shell(path, inner, showHero) {
     '<button type="button" class="side" id="qicon" aria-label="Поиск" aria-expanded="false">' + icon('search') + '</button></div><div class="results" id="results" hidden></div></div></div></nav>';
   h += '<main id="main">' + inner + '</main>' +
     '<footer class="footer"><div class="footer-in"><div><p class="name">' + SITE.name + '</p><p class="au"><a href="#/author">' + SITE.author + '</a></p></div>' +
-    '<div class="links"><a href="#/policy">Политика</a><span aria-hidden="true">·</span><a href="#/copyright">Авторские права</a><span aria-hidden="true">·</span><a href="#/about">' + SITE.year + '</a></div></div></footer></div>';
+    '<div class="links"><a href="#/policy">Политика</a><span aria-hidden="true">·</span><a href="#/copyright">Авторские права</a><span aria-hidden="true">·</span><a href="#/achievements">Достижения</a><span aria-hidden="true">·</span><a href="#/about">' + SITE.year + '</a>' + (isStandalone() ? '' : '<span aria-hidden="true" class="install-dot">·</span><button type="button" class="install" id="installApp">Скачать приложение</button>') + '</div></div></footer></div>';
   return h;
+}
+
+
+/* УСТАНОВКА КАК ПРИЛОЖЕНИЯ: кнопка «Скачать приложение» в подвале. Android/Chrome ставит сайт одним нажатием;
+   iPhone и браузеры без такой возможности получают короткую подсказку, потому что принудительно ставить сайт они не дают. */
+function isStandalone() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true; }
+var installEvent = null;
+window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); installEvent = e; });
+window.addEventListener('appinstalled', function () { installEvent = null; var b = document.getElementById('installApp'); if (b) b.remove(); });
+document.addEventListener('click', function (e) {
+  var b = e.target.closest && e.target.closest('#installApp'); if (!b) return;
+  if (installEvent) { installEvent.prompt(); installEvent.userChoice.then(function () { installEvent = null; }); return; }
+  var ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  toast(ios ? 'На iPhone: нажмите «Поделиться» в Safari, затем «На экран Домой».' : 'Откройте меню браузера (⋮) и выберите «Установить приложение» или «Добавить на главный экран».');
+  clearTimeout(toast._t); toast._t = setTimeout(function () { document.getElementById('toast').classList.remove('on'); }, 7500);
+});
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
 }
