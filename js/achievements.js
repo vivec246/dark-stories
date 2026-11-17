@@ -19,12 +19,18 @@ var ACH = [
   { id: 'heart', name: 'От всего сердца', desc: 'Поделиться рассказом или цитатой', tier: 'bronze',
     ico: '<g transform="translate(-3.5 1)"><path d="M22 47 L80 24 L64 76 L50 58 Z"/><path d="M50 58 L80 24"/><path d="M50 58 L48 74 L58 66"/></g>' },
   { id: 'collector', name: 'Коллекционер', desc: 'Дочитать ' + ACH_COLLECTOR + ' рассказов', tier: 'gold',
-    ico: '<path d="M24 64 L28 36 L41 50 L50 30 L59 50 L72 36 L76 64 Z"/><path d="M24 72 H76"/><circle cx="28" cy="33" r="2.5"/><circle cx="50" cy="27" r="2.5"/><circle cx="72" cy="33" r="2.5"/><path d="M40 58 H60" opacity=".6"/>' }
+    ico: '<path d="M24 64 L28 36 L41 50 L50 30 L59 50 L72 36 L76 64 Z"/><path d="M24 72 H76"/><circle cx="28" cy="33" r="2.5"/><circle cx="50" cy="27" r="2.5"/><circle cx="72" cy="33" r="2.5"/><path d="M40 58 H60" opacity=".6"/>' },
+  { id: 'lark', name: 'Жаворонок', desc: 'Читать в дневной теме', tier: 'silver',
+    ico: '<path d="M22 58 C30 46 42 44 50 50 C54 40 64 34 76 36 C70 40 68 46 68 52 C66 64 54 72 42 68 L32 72 L35 63 C30 63 25 61 22 58 Z"/><circle cx="62" cy="44" r="1.6" fill="currentColor" stroke="none"/><path d="M76 36 L84 33" /><path d="M30 28 V34 M24 31 H36 M70 22 V27 M67.5 24.5 H72.5" opacity=".7"/>' },
+  { id: 'themer', name: 'Темщик', desc: 'Прочитать во всех стилях и всех режимах читалки', tier: 'gold', hidden: true,
+    ico: '<circle cx="50" cy="50" r="22"/><path d="M50 28 V72" /><path d="M50 28 A22 22 0 0 1 50 72 Z" fill="currentColor" fill-opacity=".35"/><path d="M28 50 H72" opacity=".6"/><circle cx="50" cy="50" r="31" stroke-dasharray="2 4" opacity=".6"/>' },
+  { id: 'night3', name: 'Доброй ночи', desc: 'Читать глубокой ночью, когда все спят', tier: 'silver', hidden: true,
+    ico: '<path d="M52 30 A20 20 0 1 0 68 62 A17 17 0 0 1 52 30 Z"/><path d="M62 24 H72 L62 36 H72" /><path d="M74 40 H80 L74 48 H80" opacity=".8"/><path d="M28 28 V34 M25 31 H31 M76 66 V70 M74 68 H78" opacity=".7"/>' }
 ];
 
 var Ach = (function () {
-  var KEY = 'ds-achievements', st = { got: {}, done: [], last: '' };
-  try { var raw = JSON.parse(localStorage.getItem(KEY) || 'null'); if (raw && typeof raw === 'object') { st.got = raw.got || {}; st.done = raw.done || []; st.last = raw.last || ''; } } catch (e) {}
+  var KEY = 'ds-achievements', st = { got: {}, done: [], last: '', time: {}, reached: {}, combos: [] };
+  try { var raw = JSON.parse(localStorage.getItem(KEY) || 'null'); if (raw && typeof raw === 'object') { st.got = raw.got || {}; st.done = raw.done || []; st.last = raw.last || ''; st.time = raw.time || {}; st.reached = raw.reached || {}; st.combos = raw.combos || []; } } catch (e) {}
   function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
   function find(id) { for (var i = 0; i < ACH.length; i++) if (ACH[i].id === id) return ACH[i]; return null; }
 
@@ -43,7 +49,7 @@ var Ach = (function () {
     var c = TIERS[a.tier][0];
     return '<svg class="ach-medal' + (locked ? ' locked' : '') + '" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="48" fill="url(#ar-' + a.tier + ')"/><circle cx="50" cy="50" r="44.5" fill="url(#af)"/>' +
       '<circle cx="50" cy="50" r="41" fill="none" stroke="' + c + '" stroke-opacity=".45" stroke-width=".7" stroke-dasharray="1.2 2.2"/>' +
-      '<g fill="none" stroke="' + c + '" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">' + a.ico + '</g></svg>';
+      '<g color="' + c + '" fill="none" stroke="' + c + '" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">' + a.ico + '</g></svg>';
   }
 
   /* всплывающая плашка; если получено сразу несколько, показываем по очереди */
@@ -74,6 +80,16 @@ var Ach = (function () {
   function favCount() { return Store.s.favorites.filter(function (s) { var w = getWork(s); return w && w.kind === 'story'; }).length; }
   function night() { var r = document.getElementById('reader'); return !!(r && r.classList.contains('night')); }
 
+  /* скрытая «Доброй ночи»: читает между 2:00 и 4:59 по местному времени */
+  function deepNight() { var h = new Date().getHours(); return h >= 2 && h < 5; }
+  /* все сочетания «стиль × режим»: 4 стиля (стандартная, фэнтези, sci-fi, газета) × 3 режима (день, ночь, тёплый) */
+  var COMBO_STYLES = ['standard', 'fantasy', 'scifi', 'gazette'], COMBO_MODES = ['day', 'night', 'candle'];
+  function comboNow() {
+    var r = document.getElementById('reader'); if (!r) return null;
+    var cl = r.classList, style = cl.contains('scifi') ? 'scifi' : cl.contains('fantasy') ? 'fantasy' : cl.contains('gazette') ? 'gazette' : 'standard';
+    var mode = cl.contains('candle') ? 'candle' : cl.contains('night') ? 'night' : 'day';
+    return style + '|' + mode;
+  }
   function today() { var d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
 
   function init() {
@@ -106,25 +122,58 @@ var Ach = (function () {
       if (typeof text === 'string' && ((text.indexOf('/s/') >= 0 && text.indexOf('.html') >= 0) || text.indexOf('— «') >= 0)) unlock('heart');
       return ct.apply(this, arguments);
     };
-    /* дочитал до конца (так же считает цель «finished» в Метрике) */
+    /* дочитал до конца: мало долистать, нужно ещё провести в тексте разумное время (чтобы не засчитывалось быстрое пролистывание) */
+    var lastAct = Date.now();
+    ['scroll', 'touchstart', 'touchmove', 'keydown', 'mousemove', 'click', 'wheel'].forEach(function (ev) {
+      window.addEventListener(ev, function () { lastAct = Date.now(); }, { passive: true });
+    });
+    var comboKey = '', comboSec = 0;
+    function trackCombo() {
+      var k = comboNow(); if (!k) return;
+      if (k !== comboKey) { comboKey = k; comboSec = 0; return; }
+      comboSec++;
+      if (comboSec === 8) {
+        if (st.combos.indexOf(k) < 0) { st.combos.push(k); save(); }
+        if (k.split('|')[1] === 'day') unlock('lark');
+        var all = COMBO_STYLES.every(function (a) { return COMBO_MODES.every(function (m) { return st.combos.indexOf(a + '|' + m) >= 0; }); });
+        if (all) unlock('themer');
+      }
+    }
+    function needSec(w) { var words = (R && R.words) || 0; return Math.max(75, Math.round(words / 190 * 60 * 0.35)); }
+    function check() {
+      if (!R || !R.work) return;
+      var slug = R.work.slug;
+      if (st.done.indexOf(slug) >= 0) return;
+      if (st.reached[slug] && (st.time[slug] || 0) >= needSec(R.work)) markDone(slug);
+    }
+    setInterval(function () {
+      if (R && R.work && !document.hidden && Date.now() - lastAct < 45000) { if (deepNight()) unlock('night3'); trackCombo(); }
+      if (!R || !R.work || document.hidden || Date.now() - lastAct > 45000) return;
+      var slug = R.work.slug;
+      if (st.done.indexOf(slug) >= 0) return;
+      st.time[slug] = (st.time[slug] || 0) + 1;
+      if (st.time[slug] % 10 === 0) save();
+      check();
+    }, 1000);
     window.addEventListener('scroll', function () {
-      if (!R || !R.work || st.done.indexOf(R.work.slug) >= 0) return;
+      if (!R || !R.work || st.done.indexOf(R.work.slug) >= 0 || st.reached[R.work.slug]) return;
       var h = document.documentElement.scrollHeight - window.innerHeight;
-      if (h > 400 && window.scrollY / h > 0.92) markDone(R.work.slug);
+      if (h > 400 && window.scrollY / h > 0.92) { st.reached[R.work.slug] = 1; save(); check(); }
     }, { passive: true });
   }
 
   function pageHtml() {
     defs();
-    var n = ACH.filter(function (a) { return st.got[a.id]; }).length;
-    var cards = ACH.map(function (a) {
+    var vis = ACH.filter(function (a) { return !a.hidden || st.got[a.id]; }), n = ACH.filter(function (a) { return st.got[a.id]; }).length;
+    var hiddenLeft = ACH.filter(function (a) { return a.hidden && !st.got[a.id]; }).length;
+    var cards = vis.map(function (a) {
       var got = !!st.got[a.id], extra = '';
       if (a.id === 'collector' && !got) extra = '<div class="ap">' + Math.min(doneStories().length, ACH_COLLECTOR) + ' из ' + ACH_COLLECTOR + '</div>';
       if (a.id === 'shelf' && !got) extra = '<div class="ap">' + Math.min(favCount(), 3) + ' из 3</div>';
       return '<div class="ach-card' + (got ? ' got' : '') + '">' + medal(a, !got) + '<div class="an">' + esc(a.name) + '</div><div class="ad">' + esc(a.desc) + '</div>' +
         (got ? '<div class="ap ok">Получено ' + new Date(st.got[a.id]).toLocaleDateString('ru-RU') + '</div>' : (extra || '<div class="ap">Пока не получено</div>')) + '</div>';
     }).join('');
-    return '<article class="doc ach-page">' + docCloseBtn() + '<h1>Достижения</h1><p class="ach-sub">Получено: ' + n + ' из ' + ACH.length + '. Прогресс хранится только в вашем браузере.</p><div class="ach-grid">' + cards + '</div></article>';
+    return '<article class="doc ach-page">' + docCloseBtn() + '<h1>Достижения</h1><p class="ach-sub">Получено: ' + n + ' из ' + vis.length + (hiddenLeft ? ' (+ секретные: ' + hiddenLeft + ')' : '') + '. Прогресс хранится только в вашем браузере.</p><div class="ach-grid">' + cards + '</div></article>';
   }
   return { init: init, unlock: unlock, markDone: markDone, pageHtml: pageHtml };
 })();
