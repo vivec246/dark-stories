@@ -1224,15 +1224,15 @@ html:has(#reader.noir)::-webkit-scrollbar-button{display:none;width:0;height:0}
 .ach-page .ach-th{display:flex;align-items:baseline;gap:.7rem;letter-spacing:normal;text-transform:none;font-size:1.35rem}
 .ach-page .ach-th .ach-dot,.ach-page .ach-th::after{display:none}
 .ach-page .ach-th em{margin-left:0;order:0;opacity:.6;font-size:1.05rem}
-@media (min-width:760px){.ach-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:1.6rem .5rem}.ach-card .an{font-size:.9rem}.ach-card .ad{font-size:.76rem}}
+@media (min-width:760px){.ach-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:1.6rem .5rem}.ach-card .ach-medal{width:min(120px,100%)}.ach-card .an{font-size:.9rem}.ach-card .ad{font-size:.76rem}}
 .ach-card .an,.ach-card .ad{overflow-wrap:anywhere}
 .ach-card{--tc:#e6eefc;cursor:default;-webkit-tap-highlight-color:transparent}
 .ach-tier.bronze .ach-card{--tc:#e0a070}.ach-tier.silver .ach-card{--tc:#d5dce8}.ach-tier.gold .ach-card{--tc:#e3c470}
 .ach-card .ach-medal{transition:transform .25s ease,filter .25s ease;will-change:transform}
 @media (hover:hover){
   .ach-card:hover .ach-medal{transform:scale(1.1);filter:drop-shadow(0 0 16px var(--tc)) drop-shadow(0 6px 12px rgba(0,0,0,.5))}
-  .ach-card:hover .ach-medal.locked{filter:grayscale(1) brightness(.62) drop-shadow(0 0 14px var(--tc))}
+  .ach-card:hover .ach-medal.locked{filter:grayscale(1) brightness(.7) drop-shadow(0 0 14px rgba(190,198,212,.75))}
 }
 .ach-card.tap .ach-medal{transform:scale(1.1);filter:drop-shadow(0 0 16px var(--tc)) drop-shadow(0 6px 12px rgba(0,0,0,.5))}
-.ach-card.tap .ach-medal.locked{filter:grayscale(1) brightness(.62) drop-shadow(0 0 14px var(--tc))}
+.ach-card.tap .ach-medal.locked{filter:grayscale(1) brightness(.7) drop-shadow(0 0 14px rgba(190,198,212,.75))}
 @media (prefers-reduced-motion:reduce){.ach-card .ach-medal{transition:none}}
