@@ -779,9 +779,9 @@ html.kbd .sp-keys{display:block}   /* подсказка по клавишам �
    Работает с тремя темами: ночь, день, свеча. Цвета — в переменных --sf-*.
    ===================================================================== */
 #reader.scifi{--sf-head:'Tektur',var(--font-display),sans-serif;--sf-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--sf-bg);background-attachment:fixed}
-:is(#reader,#overlay-root).scifi.night{--sf-bg:radial-gradient(ellipse 70% 60% at 50% 40%,#0a2336 0%,#04101a 55%,#02060b 100%);--sf-panel:rgba(5,18,29,.94);--sf-line:rgba(79,209,255,.34);--sf-soft:rgba(79,209,255,.12);--sf-acc:#4fd1ff;--sf-acc2:#a6ecff;--sf-ink:#cfe9f5;--sf-dim:#78a0b6;--sf-glow:0 0 18px rgba(79,209,255,.35);--sf-tglow:0 0 22px rgba(79,209,255,.45);--sf-scan:rgba(0,0,0,.18);--sf-shadow:0 20px 60px rgba(0,0,0,.5);--sf-on:#02060b;--sf-chip-bg:rgba(79,209,255,.12);--sf-chip-fg:#a6ecff}
-:is(#reader,#overlay-root).scifi.night.candle{--sf-bg:radial-gradient(ellipse 70% 60% at 50% 42%,#2a1707 0%,#120a04 55%,#080402 100%);--sf-panel:rgba(26,15,7,.95);--sf-line:rgba(227,165,72,.38);--sf-soft:rgba(227,165,72,.11);--sf-acc:#e3a548;--sf-acc2:#ffd89a;--sf-ink:#e2cca6;--sf-dim:#a8906a;--sf-glow:0 0 18px rgba(227,150,50,.38);--sf-tglow:0 0 22px rgba(227,150,50,.5);--sf-scan:rgba(0,0,0,.2);--sf-on:#120a04;--sf-chip-bg:rgba(227,165,72,.11);--sf-chip-fg:#ffd89a}
-:is(#reader,#overlay-root).scifi.day{--sf-bg:radial-gradient(ellipse 70% 60% at 50% 40%,#f1f7fa 0%,#dfeaf0 55%,#d6e4ec 100%);--sf-panel:rgba(251,253,254,.97);--sf-line:rgba(10,100,140,.42);--sf-soft:rgba(10,100,140,.1);--sf-acc:#0a6f94;--sf-acc2:#07506b;--sf-ink:#14313f;--sf-dim:#4a6a7b;--sf-glow:0 0 0 transparent;--sf-tglow:none;--sf-scan:rgba(10,100,140,.035);--sf-shadow:0 18px 44px rgba(20,60,85,.16);--sf-on:#fff;--sf-chip-bg:#0a6f94;--sf-chip-fg:#fff}
+:is(#reader,#overlay-root,#readerContextMenu,#selbar).scifi.night{--sf-bg:radial-gradient(ellipse 70% 60% at 50% 40%,#0a2336 0%,#04101a 55%,#02060b 100%);--sf-panel:rgba(5,18,29,.94);--sf-line:rgba(79,209,255,.34);--sf-soft:rgba(79,209,255,.12);--sf-acc:#4fd1ff;--sf-acc2:#a6ecff;--sf-ink:#cfe9f5;--sf-dim:#78a0b6;--sf-glow:0 0 18px rgba(79,209,255,.35);--sf-tglow:0 0 22px rgba(79,209,255,.45);--sf-scan:rgba(0,0,0,.18);--sf-shadow:0 20px 60px rgba(0,0,0,.5);--sf-on:#02060b;--sf-chip-bg:rgba(79,209,255,.12);--sf-chip-fg:#a6ecff}
+:is(#reader,#overlay-root,#readerContextMenu,#selbar).scifi.night.candle{--sf-bg:radial-gradient(ellipse 70% 60% at 50% 42%,#2a1707 0%,#120a04 55%,#080402 100%);--sf-panel:rgba(26,15,7,.95);--sf-line:rgba(227,165,72,.38);--sf-soft:rgba(227,165,72,.11);--sf-acc:#e3a548;--sf-acc2:#ffd89a;--sf-ink:#e2cca6;--sf-dim:#a8906a;--sf-glow:0 0 18px rgba(227,150,50,.38);--sf-tglow:0 0 22px rgba(227,150,50,.5);--sf-scan:rgba(0,0,0,.2);--sf-on:#120a04;--sf-chip-bg:rgba(227,165,72,.11);--sf-chip-fg:#ffd89a}
+:is(#reader,#overlay-root,#readerContextMenu,#selbar).scifi.day{--sf-bg:radial-gradient(ellipse 70% 60% at 50% 40%,#f1f7fa 0%,#dfeaf0 55%,#d6e4ec 100%);--sf-panel:rgba(251,253,254,.97);--sf-line:rgba(10,100,140,.42);--sf-soft:rgba(10,100,140,.1);--sf-acc:#0a6f94;--sf-acc2:#07506b;--sf-ink:#14313f;--sf-dim:#4a6a7b;--sf-glow:0 0 0 transparent;--sf-tglow:none;--sf-scan:rgba(10,100,140,.035);--sf-shadow:0 18px 44px rgba(20,60,85,.16);--sf-on:#fff;--sf-chip-bg:#0a6f94;--sf-chip-fg:#fff}
 /* сетка и линии развёртки на фоне */
 #reader.scifi::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:linear-gradient(var(--sf-soft) 1px,transparent 1px),linear-gradient(90deg,var(--sf-soft) 1px,transparent 1px),repeating-linear-gradient(0deg,var(--sf-scan) 0 1px,transparent 1px 3px);
@@ -834,9 +834,9 @@ html.kbd .sp-keys{display:block}   /* подсказка по клавишам �
    В тёмных темах та же картинка перекрашивается фильтром (--fa-filter).
    ===================================================================== */
 #reader.fantasy{--fa-head:'Cormorant Garamond',Georgia,'Times New Roman',serif;background:var(--fa-bg);background-attachment:fixed}
-:is(#reader,#overlay-root).fantasy.day{--fa-bg:radial-gradient(ellipse 80% 60% at 50% 25%,#3b2b1b 0%,#20160d 60%,#0f0a06 100%);--fa-panel:#ecd7a8;--fa-ink:#3a2814;--fa-title:#2a1a0b;--fa-acc:#7a2b16;--fa-gold:#97702c;--fa-line:rgba(122,84,30,.55);--fa-dim:#6b5233;--fa-on-bg:#7a2b16;--fa-on-fg:#f6e8c4;--fa-filter:none;--fa-art-op:1;--fa-shadow:0 20px 60px rgba(0,0,0,.6)}
-:is(#reader,#overlay-root).fantasy.night{--fa-bg:linear-gradient(rgba(3,6,12,.25),rgba(3,6,12,.5)),url('../art/fantasy-night.jpg') center/cover no-repeat,#03060c;--fa-panel:#0b1424;--fa-ink:#cdd8ee;--fa-title:#e9effc;--fa-acc:#b9caf2;--fa-gold:#8fa6d8;--fa-line:rgba(143,166,216,.4);--fa-dim:#8da1c9;--fa-on-bg:#b9caf2;--fa-on-fg:#0b1424;--fa-filter:invert(1) sepia(.55) hue-rotate(190deg) saturate(1.7) brightness(.78);--fa-art-op:.85;--fa-shadow:0 20px 60px rgba(0,0,0,.6)}
-:is(#reader,#overlay-root).fantasy.night.candle{--fa-bg:linear-gradient(rgba(4,10,6,.25),rgba(4,10,6,.5)),url('../art/fantasy-candle.jpg') center/cover no-repeat,#040a06;--fa-panel:#0b1a11;--fa-ink:#e0d8b8;--fa-title:#f2e2a8;--fa-acc:#e3c470;--fa-gold:#c9a24f;--fa-line:rgba(201,162,79,.42);--fa-dim:#a99d76;--fa-on-bg:#e3c470;--fa-on-fg:#0b1a11;--fa-filter:invert(1) sepia(.85) hue-rotate(35deg) saturate(1.5) brightness(.72)}
+:is(#reader,#overlay-root,#readerContextMenu,#selbar).fantasy.day{--fa-bg:radial-gradient(ellipse 80% 60% at 50% 25%,#3b2b1b 0%,#20160d 60%,#0f0a06 100%);--fa-panel:#ecd7a8;--fa-ink:#3a2814;--fa-title:#2a1a0b;--fa-acc:#7a2b16;--fa-gold:#97702c;--fa-line:rgba(122,84,30,.55);--fa-dim:#6b5233;--fa-on-bg:#7a2b16;--fa-on-fg:#f6e8c4;--fa-filter:none;--fa-art-op:1;--fa-shadow:0 20px 60px rgba(0,0,0,.6)}
+:is(#reader,#overlay-root,#readerContextMenu,#selbar).fantasy.night{--fa-bg:linear-gradient(rgba(3,6,12,.25),rgba(3,6,12,.5)),url('../art/fantasy-night.jpg') center/cover no-repeat,#03060c;--fa-panel:#0b1424;--fa-ink:#cdd8ee;--fa-title:#e9effc;--fa-acc:#b9caf2;--fa-gold:#8fa6d8;--fa-line:rgba(143,166,216,.4);--fa-dim:#8da1c9;--fa-on-bg:#b9caf2;--fa-on-fg:#0b1424;--fa-filter:invert(1) sepia(.55) hue-rotate(190deg) saturate(1.7) brightness(.78);--fa-art-op:.85;--fa-shadow:0 20px 60px rgba(0,0,0,.6)}
+:is(#reader,#overlay-root,#readerContextMenu,#selbar).fantasy.night.candle{--fa-bg:linear-gradient(rgba(4,10,6,.25),rgba(4,10,6,.5)),url('../art/fantasy-candle.jpg') center/cover no-repeat,#040a06;--fa-panel:#0b1a11;--fa-ink:#e0d8b8;--fa-title:#f2e2a8;--fa-acc:#e3c470;--fa-gold:#c9a24f;--fa-line:rgba(201,162,79,.42);--fa-dim:#a99d76;--fa-on-bg:#e3c470;--fa-on-fg:#0b1a11;--fa-filter:invert(1) sepia(.85) hue-rotate(35deg) saturate(1.5) brightness(.72)}
 /* страница-свиток с двойной рамкой и точками в углах */
 #reader.fantasy .rcontent{position:relative;z-index:1;container-type:inline-size;border-radius:3px;background-color:var(--fa-panel);border:1px solid var(--fa-gold);box-shadow:var(--fa-shadow);outline:1px solid var(--fa-line);outline-offset:-9px;overflow:hidden;padding-top:60px}
 #reader.fantasy.day .rcontent{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .3 0 0 0 0 .14 0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),linear-gradient(#f1dfb2,#e4cb94)}
@@ -922,9 +922,9 @@ html:has(#reader.scifi)::-webkit-scrollbar-button,html:has(#reader.fantasy)::-we
    заголовок с двойной линией, буквица. День — бумага; ночью — негатив (тёмная бумага, светлая краска); свеча — тёплая сепия.
    ===================================================================== */
 #reader.gazette{--gz-head:var(--font-display),'Playfair Display',Georgia,serif;--gz-body:Georgia,'Times New Roman',serif;background:var(--gz-desk);background-attachment:fixed}
-:is(#reader,#overlay-root).gazette.day{--gz-desk:radial-gradient(ellipse 80% 60% at 50% 25%,#2c2720 0%,#15120e 70%,#0a0907 100%);--gz-paper:#faf6e6;--gz-ink:#1c1a17;--gz-text:#241f18;--gz-red:#8a1c1c;--gz-dim:#5b5444;--gz-line:rgba(28,26,23,.55);--gz-shadow:0 22px 60px rgba(0,0,0,.65),0 3px 8px rgba(0,0,0,.4)}
-:is(#reader,#overlay-root).gazette.night{--gz-desk:radial-gradient(ellipse 80% 60% at 50% 25%,#12110f 0%,#080706 70%,#030302 100%);--gz-paper:#141210;--gz-ink:#ece6d4;--gz-text:#d9d2bf;--gz-red:#dc7b66;--gz-dim:#9b9482;--gz-line:rgba(236,230,212,.45);--gz-shadow:0 22px 60px rgba(0,0,0,.7),0 0 0 1px rgba(236,230,212,.05)}
-:is(#reader,#overlay-root).gazette.night.candle{--gz-desk:radial-gradient(ellipse 80% 60% at 50% 25%,#1d140b 0%,#0e0905 70%,#050302 100%);--gz-paper:#1b140c;--gz-ink:#f1dfb4;--gz-text:#e2cfa2;--gz-red:#e8a553;--gz-dim:#a8936a;--gz-line:rgba(241,223,180,.42)}
+:is(#reader,#overlay-root,#readerContextMenu,#selbar).gazette.day{--gz-desk:radial-gradient(ellipse 80% 60% at 50% 25%,#2c2720 0%,#15120e 70%,#0a0907 100%);--gz-paper:#faf6e6;--gz-ink:#1c1a17;--gz-text:#241f18;--gz-red:#8a1c1c;--gz-dim:#5b5444;--gz-line:rgba(28,26,23,.55);--gz-shadow:0 22px 60px rgba(0,0,0,.65),0 3px 8px rgba(0,0,0,.4)}
+:is(#reader,#overlay-root,#readerContextMenu,#selbar).gazette.night{--gz-desk:radial-gradient(ellipse 80% 60% at 50% 25%,#12110f 0%,#080706 70%,#030302 100%);--gz-paper:#141210;--gz-ink:#ece6d4;--gz-text:#d9d2bf;--gz-red:#dc7b66;--gz-dim:#9b9482;--gz-line:rgba(236,230,212,.45);--gz-shadow:0 22px 60px rgba(0,0,0,.7),0 0 0 1px rgba(236,230,212,.05)}
+:is(#reader,#overlay-root,#readerContextMenu,#selbar).gazette.night.candle{--gz-desk:radial-gradient(ellipse 80% 60% at 50% 25%,#1d140b 0%,#0e0905 70%,#050302 100%);--gz-paper:#1b140c;--gz-ink:#f1dfb4;--gz-text:#e2cfa2;--gz-red:#e8a553;--gz-dim:#a8936a;--gz-line:rgba(241,223,180,.42)}
 #reader.gazette .rcontent{border-radius:2px;background-color:var(--gz-paper);border:1px solid var(--gz-ink);box-shadow:var(--gz-shadow);outline:1px solid var(--gz-line);outline-offset:-8px;padding-top:44px;position:relative;overflow:hidden}
 #reader.gazette.day .rcontent{background-image:radial-gradient(ellipse at center,transparent 55%,rgba(150,118,50,.16) 100%),url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .28 0 0 0 0 .15 0 0 0 .1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 #reader.gazette.night .rcontent{background-image:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.35) 100%)}
@@ -1092,3 +1092,147 @@ html:has(#reader.gazette)::-webkit-scrollbar-button{display:none;width:0;height:
 .ach-toast .ad{font-size:.78rem;opacity:.65;line-height:1.25}
 @keyframes achSpin{0%{transform:rotateY(0) scale(.5);opacity:0}60%{transform:rotateY(300deg) scale(1.15)}100%{transform:rotateY(360deg) scale(1);opacity:1}}
 @media (prefers-reduced-motion:reduce){.ach-toast .ach-medal{animation:none}}
+
+/* МЕНЮ ВЫДЕЛЕНИЯ (и нижняя панель на телефоне) — в тему читалки */
+.context-menu[class*="fantasy"],.context-menu[class*="scifi"],.context-menu[class*="gazette"]{backdrop-filter:none;-webkit-backdrop-filter:none}
+#readerContextMenu.fantasy{background:var(--fa-panel);border:1px solid var(--fa-gold);outline:1px solid var(--fa-line);outline-offset:-4px;border-radius:3px;box-shadow:var(--fa-shadow)}
+#readerContextMenu.fantasy .context-menu-item{color:var(--fa-ink);border-radius:2px;font-family:var(--font-sans)}
+#readerContextMenu.fantasy .context-menu-item .ico{color:var(--fa-acc)}
+#readerContextMenu.fantasy .context-menu-item:hover,#readerContextMenu.fantasy .context-menu-item:active{background:var(--fa-on-bg);color:var(--fa-on-fg)}
+#readerContextMenu.fantasy .context-menu-item:hover .ico,#readerContextMenu.fantasy .context-menu-item:active .ico{color:var(--fa-on-fg)}
+#readerContextMenu.scifi{background:var(--sf-panel);border:1px solid var(--sf-line);border-radius:0;box-shadow:var(--sf-shadow)}
+#readerContextMenu.scifi .context-menu-item{color:var(--sf-ink);border-radius:0;letter-spacing:.08em}
+#readerContextMenu.scifi .context-menu-item .ico{color:var(--sf-acc)}
+#readerContextMenu.scifi .context-menu-item:hover,#readerContextMenu.scifi .context-menu-item:active{background:var(--sf-chip-bg);color:var(--sf-chip-fg);box-shadow:var(--sf-glow)}
+#readerContextMenu.scifi .context-menu-item:hover .ico,#readerContextMenu.scifi .context-menu-item:active .ico{color:var(--sf-chip-fg)}
+#readerContextMenu.gazette{background:var(--gz-paper);border:1.5px solid var(--gz-ink);outline:1px solid var(--gz-line);outline-offset:-4px;border-radius:2px;box-shadow:var(--gz-shadow)}
+#readerContextMenu.gazette .context-menu-item{color:var(--gz-text);border-radius:0}
+#readerContextMenu.gazette .context-menu-item .ico{color:var(--gz-red)}
+#readerContextMenu.gazette .context-menu-item:hover,#readerContextMenu.gazette .context-menu-item:active{background:var(--gz-ink);color:var(--gz-paper)}
+#readerContextMenu.gazette .context-menu-item:hover .ico,#readerContextMenu.gazette .context-menu-item:active .ico{color:var(--gz-paper)}
+/* нижняя панель на телефоне */
+#selbar.fantasy{background:var(--fa-panel);border:1px solid var(--fa-gold);outline:1px solid var(--fa-line);outline-offset:-4px;border-radius:3px;box-shadow:var(--fa-shadow)}
+#selbar.fantasy button{color:var(--fa-ink)}#selbar.fantasy button:active{background:var(--fa-on-bg);color:var(--fa-on-fg)}
+#selbar.scifi{background:var(--sf-panel);border:1px solid var(--sf-line);border-radius:0;box-shadow:var(--sf-shadow)}
+#selbar.scifi button{color:var(--sf-ink);border-radius:0}#selbar.scifi button:active{background:var(--sf-chip-bg);color:var(--sf-chip-fg)}
+#selbar.gazette{background:var(--gz-paper);border:1.5px solid var(--gz-ink);outline:1px solid var(--gz-line);outline-offset:-4px;border-radius:2px;box-shadow:var(--gz-shadow)}
+#selbar.gazette button{color:var(--gz-text);border-radius:0}#selbar.gazette button:active{background:var(--gz-ink);color:var(--gz-paper)}
+
+.ach-tier{margin-top:1.6rem}
+.ach-th{display:flex;align-items:center;gap:.6rem;margin:0 0 1rem;font-size:.8rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--tc,#e6eefc)}
+.ach-th em{margin-left:auto;font-style:normal;font-weight:600;letter-spacing:.08em;opacity:.55;font-size:.75rem}
+.ach-dot{width:10px;height:10px;border-radius:50%;background:var(--tc);box-shadow:0 0 10px var(--tc)}
+.ach-th::after{content:"";order:1;flex:1;height:1px;background:linear-gradient(90deg,var(--tc),transparent);opacity:.4}
+.ach-th em{order:2;margin-left:0}
+.ach-tier.bronze{--tc:#e0a070}.ach-tier.silver{--tc:#d5dce8}.ach-tier.gold{--tc:#e3c470}
+
+/* АНОНС: карточка без кнопки «Читать» */
+.bcard.soon,.paper.soon{cursor:default}
+.btn-soon,.pp-soon{cursor:default;pointer-events:none;opacity:.75}
+.btn-soon{display:inline-flex;align-items:center;padding:.5rem .9rem;border:1px dashed var(--accent);border-radius:999px;font:700 10px/1 var(--font-sans);letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+.pp-soon{color:#8a1c1c;border-bottom:2px dashed #8a1c1c}
+.bk-soon{background:rgba(227,196,112,.2);color:#e3c470;border:1px solid rgba(227,196,112,.45)}
+.bcard.soon .bk-cover,.paper.soon .pp-photo img{filter:saturate(.8) brightness(.9)}
+
+/* Карточка статьи: картинка всегда квадратная, а название подгоняет размер шрифта под оставшееся место (js/cards.js, fitMasts) */
+.pp-sheet:not(.pp-back) .pp-photo{flex:none;width:100%;aspect-ratio:1/1;min-height:0}
+.pp-sheet:not(.pp-back) .pp-mast{flex:1 1 0;min-height:0;display:flex;flex-direction:column;justify-content:center;-webkit-line-clamp:unset;margin:0 0 6px;overflow:hidden;line-height:1.04}
+.pp-sheet:not(.pp-back){padding-top:10px;padding-bottom:10px}
+.pp-sheet:not(.pp-back) .pp-meta{padding-bottom:3px}
+.pp-sheet:not(.pp-back) .pp-rule{margin-bottom:6px}
+.pp-sheet:not(.pp-back) .pp-photo{margin-bottom:5px}
+.pp-sheet:not(.pp-back) .pp-foot{padding-top:5px}
+.pp-sheet:not(.pp-back) .pp-mast{margin:0 0 4px}
+
+
+/* ================= НУАР: протокол частного детектива (readerStyle: 'noir') =================
+   Лист в линейку. Размер строки (шаг линий) считается от размера шрифта читателя (--nr-fsz из js/reader.js) и интервала,
+   поэтому текст всегда стоит ровно между линиями. Меню и окна читалки в нуаре одеваются как газетные (класс gazette) с этими же цветами. */
+#reader.noir,#overlay-root.noir{--gz-head:'PT Mono','Courier New',ui-monospace,monospace;--gz-body:'PT Mono','Courier New',ui-monospace,monospace}
+#reader.noir{background:var(--gz-desk);background-attachment:fixed;--nr-lead:1.9}
+#reader.noir[data-lead="tight"]{--nr-lead:1.6}
+#reader.noir[data-lead="loose"]{--nr-lead:2.3}
+:is(#reader,#overlay-root,#readerContextMenu,#selbar).noir.day{--gz-desk:radial-gradient(ellipse 80% 60% at 50% 20%,#d8ccb0 0%,#b9aa86 75%,#a89a78 100%);--gz-paper:#ece3c9;--gz-ink:#2a2620;--gz-text:#2d2822;--gz-red:#9b2a22;--gz-dim:#7a7058;--gz-line:rgba(42,38,32,.4);--gz-shadow:0 22px 50px rgba(40,30,10,.45),0 3px 8px rgba(40,30,10,.3);--nr-gl:rgba(42,38,32,.11)}
+:is(#reader,#overlay-root,#readerContextMenu,#selbar).noir.night{--gz-desk:radial-gradient(ellipse 60% 45% at 50% -5%,rgba(255,190,100,.26),transparent 70%),#0a0c10;--gz-paper:#1a1713;--gz-ink:#d8cdb2;--gz-text:#cfc4a8;--gz-red:#e0584c;--gz-dim:#8f8468;--gz-line:rgba(216,205,178,.35);--gz-shadow:0 22px 60px rgba(0,0,0,.8);--nr-gl:rgba(236,222,190,.09)}
+:is(#reader,#overlay-root,#readerContextMenu,#selbar).noir.night.candle{--gz-desk:radial-gradient(ellipse 60% 45% at 50% -5%,rgba(255,150,60,.34),transparent 70%),#150d06;--gz-paper:#21170d;--gz-ink:#f0d9a8;--gz-text:#e2cfa2;--gz-red:#e0584c;--gz-dim:#a8936a;--gz-line:rgba(240,217,168,.36);--gz-shadow:0 22px 60px rgba(0,0,0,.8);--nr-gl:rgba(240,217,168,.10)}
+
+#reader.noir .rcontent{position:relative;border-radius:2px;background-color:var(--gz-paper);border:1px solid var(--gz-line);box-shadow:var(--gz-shadow);
+  -webkit-backdrop-filter:none;backdrop-filter:none;padding-top:44px;padding-bottom:70px;
+  background-image:radial-gradient(ellipse at center,transparent 62%,rgba(0,0,0,.13) 100%)}
+/* штамп «ДЕЛО № 07» */
+#reader.noir .rcontent[data-case]::after{content:"ДЕЛО № " attr(data-case);position:absolute;right:26px;top:26px;transform:rotate(7deg);border:3px solid var(--gz-red);color:var(--gz-red);
+  padding:5px 12px;font:700 15px/1 var(--gz-head);letter-spacing:.14em;border-radius:4px;opacity:.92;pointer-events:none}
+
+/* сетка линий: шаг --nr-step; все блоки занимают целое число строк */
+#reader.noir .reader-body{--nr-fs:calc(var(--nr-fsz,1) * 1.05rem);--nr-step:calc(var(--nr-fs) * var(--nr-lead));
+  font-family:var(--gz-body);font-size:var(--nr-fs);line-height:var(--nr-step);color:var(--gz-text);
+  background-image:linear-gradient(to bottom,transparent calc(var(--nr-step) - 2px),var(--nr-gl) calc(var(--nr-step) - 2px));background-size:100% var(--nr-step)}
+#reader.noir .reader-body::before{content:"ТЕДДИ МУРР, ЧАСТНЫЙ ДЕТЕКТИВ";display:block;height:var(--nr-step);line-height:var(--nr-step);font:700 .62rem/var(--nr-step) var(--gz-head);letter-spacing:.18em;color:var(--gz-dim)}
+#reader.noir .reader-body h1{font-family:var(--gz-head);font-weight:700;text-transform:uppercase;letter-spacing:.04em;text-align:left;color:var(--gz-ink);
+  font-size:min(2.1rem,calc(var(--nr-step) * .82));line-height:var(--nr-step);margin:0;padding:0;border:0;max-width:calc(100% - 20px)}
+#reader.noir .reader-body h1::after{content:"";display:block;box-sizing:border-box;height:6px;margin:calc(var(--nr-step) * .4 - 3px) 0 calc(var(--nr-step) * .6 - 3px);border-top:2px solid var(--gz-ink);border-bottom:1px solid var(--gz-ink);opacity:.6;background:none;width:auto}
+#reader.noir .reader-body h2,#reader.noir .reader-body h3{font-family:var(--gz-head);font-weight:700;text-transform:uppercase;letter-spacing:.2em;text-align:left;color:var(--gz-red);
+  font-size:min(.95rem,calc(var(--nr-step) * .5));line-height:var(--nr-step);margin:var(--nr-step) 0 0;padding:0;border:0}
+#reader.noir .reader-body h2:first-child,#reader.noir .reader-body h1 + h2{margin-top:0}
+#reader.noir .reader-body p,#reader.noir .reader-body li,#reader.noir .reader-body blockquote{font-family:var(--gz-body);font-size:1em!important;line-height:var(--nr-step);color:var(--gz-text);text-align:left}
+#reader.noir .reader-body p{margin:0 0 var(--nr-step)}
+#reader.noir .reader-body ul,#reader.noir .reader-body ol{margin:0 0 var(--nr-step);padding-left:1.4em}
+#reader.noir .reader-body blockquote{margin:0 0 var(--nr-step);padding:0 0 0 1em;border-left:3px solid var(--gz-red);color:var(--gz-dim);background:none}
+#reader.noir .reader-body a,#reader.noir .reader-body a.md-link{color:var(--gz-red);text-decoration:underline}
+#reader.noir .reader-body hr{border:0;height:var(--nr-step);margin:0;background:repeating-linear-gradient(90deg,var(--gz-line) 0 8px,transparent 8px 14px) 0 50%/100% 2px no-repeat}
+#reader.noir .reader-body strong{color:var(--gz-ink)}
+
+/* счётчик минут — красная печать; в конце текста «ДЕЛО РАСКРЫТО» */
+#reader.noir .rtime{left:1.2rem;bottom:1.7rem;border:3px double var(--gz-red);border-radius:3px;background:var(--gz-paper);color:var(--gz-red);
+  -webkit-backdrop-filter:none;backdrop-filter:none;font:700 12px/1 var(--gz-head);letter-spacing:.16em;text-transform:none;padding:9px 15px;transform:rotate(-4deg);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+#reader.noir .rtime b{font-size:20px;letter-spacing:.04em;margin:0 3px;font-weight:700}
+#reader.noir .rtime.done{font-size:15px;padding:11px 18px;animation:nrStamp .45s cubic-bezier(.2,1.5,.4,1)}
+@keyframes nrStamp{0%{transform:rotate(-4deg) scale(2.3);opacity:0}100%{transform:rotate(-4deg) scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){#reader.noir .rtime.done{animation:none}}
+
+@media (max-width:600px){
+  #reader.noir .rcontent{padding-top:58px}
+  #reader.noir .rcontent[data-case]::after{top:16px;right:66px;font-size:13px}
+  #reader.noir .reader-body::before{font-size:.56rem}
+}
+#reader.noir .rbar{background:var(--gz-line)}
+#reader.noir .rbar i{background:var(--gz-red)}
+#reader.noir .btn.control{border-radius:50%;border:1.5px solid var(--gz-ink);background:var(--gz-paper);color:var(--gz-ink);box-shadow:0 4px 14px rgba(0,0,0,.45)}
+#reader.noir .btn.control:hover{background:var(--gz-ink);color:var(--gz-paper)}
+#reader.noir .rnext-t,#reader.noir .rend{color:var(--gz-red)}
+#reader.noir .spop{border-radius:2px;border:1.5px solid var(--gz-ink);outline:1px solid var(--gz-line);outline-offset:-5px;background:var(--gz-paper);box-shadow:var(--gz-shadow);color:var(--gz-text)}
+#reader.noir .sp-t{color:var(--gz-red);font:700 11px/1 var(--font-sans);letter-spacing:.2em}
+#reader.noir .sp-keys{color:var(--gz-dim)}
+#reader.noir .spop input[type=range]{accent-color:var(--gz-red)}
+#reader.noir .chip{border-radius:2px;border:1px solid var(--gz-line);background:transparent;color:var(--gz-ink)}
+#reader.noir .chip:hover{border-color:var(--gz-ink);color:var(--gz-red)}
+#reader.noir .chip.on{background:var(--gz-ink);border-color:var(--gz-ink);color:var(--gz-paper)}
+@media (hover:hover) and (pointer:fine){#reader.noir .rbar{display:none}}
+#reader.noir .tpop .chip.on{background:var(--gz-ink);border-color:var(--gz-ink);color:var(--gz-paper);font-weight:700}
+#reader.noir{--rs:var(--gz-red)}
+#reader.noir .reader-body a.md-link{color:var(--gz-red);text-decoration-style:solid}
+html:has(#reader.noir.day){--sb-thumb:#8a7d5e;--sb-line:rgba(42,38,32,.3);--sb-bg:#b9aa86}
+html:has(#reader.noir.night){--sb-thumb:#e0584c;--sb-line:rgba(216,205,178,.25);--sb-bg:#0a0c10}
+html:has(#reader.noir.night.candle){--sb-thumb:#e0584c;--sb-line:rgba(240,217,168,.28);--sb-bg:#150d06}
+html:has(#reader.noir){scrollbar-color:var(--sb-thumb) var(--sb-bg)}
+html:has(#reader.noir)::-webkit-scrollbar{width:16px;background:var(--sb-bg)}
+html:has(#reader.noir)::-webkit-scrollbar-track{background:var(--sb-bg)}
+html:has(#reader.noir)::-webkit-scrollbar-thumb{min-height:44px;background:var(--sb-thumb);background-clip:padding-box;border:4px solid var(--sb-bg);border-radius:8px}
+html:has(#reader.noir)::-webkit-scrollbar-button{display:none;width:0;height:0}
+
+/* ДОСТИЖЕНИЯ: 5 в ряд, заголовок уровня, подсветка медали при наведении и касании */
+.ach-page .ach-th{display:flex;align-items:baseline;gap:.7rem;letter-spacing:normal;text-transform:none;font-size:1.35rem}
+.ach-page .ach-th .ach-dot,.ach-page .ach-th::after{display:none}
+.ach-page .ach-th em{margin-left:0;order:0;opacity:.6;font-size:1.05rem}
+@media (min-width:760px){.ach-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:1.6rem .5rem}.ach-card .an{font-size:.9rem}.ach-card .ad{font-size:.76rem}}
+.ach-card .an,.ach-card .ad{overflow-wrap:anywhere}
+.ach-card{--tc:#e6eefc;cursor:default;-webkit-tap-highlight-color:transparent}
+.ach-tier.bronze .ach-card{--tc:#e0a070}.ach-tier.silver .ach-card{--tc:#d5dce8}.ach-tier.gold .ach-card{--tc:#e3c470}
+.ach-card .ach-medal{transition:transform .25s ease,filter .25s ease;will-change:transform}
+@media (hover:hover){
+  .ach-card:hover .ach-medal{transform:scale(1.1);filter:drop-shadow(0 0 16px var(--tc)) drop-shadow(0 6px 12px rgba(0,0,0,.5))}
+  .ach-card:hover .ach-medal.locked{filter:grayscale(1) brightness(.62) drop-shadow(0 0 14px var(--tc))}
+}
+.ach-card.tap .ach-medal{transform:scale(1.1);filter:drop-shadow(0 0 16px var(--tc)) drop-shadow(0 6px 12px rgba(0,0,0,.5))}
+.ach-card.tap .ach-medal.locked{filter:grayscale(1) brightness(.62) drop-shadow(0 0 14px var(--tc))}
+@media (prefers-reduced-motion:reduce){.ach-card .ach-medal{transition:none}}

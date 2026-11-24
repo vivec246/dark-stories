@@ -272,6 +272,13 @@ var Ach = (function () {
   return { init: init, unlock: unlock, markDone: markDone, pageHtml: pageHtml };
 })();
 
+/* касание на телефоне: подсветить и увеличить нажатую медаль */
+document.addEventListener('click', function (e) {
+  var c = e.target.closest && e.target.closest('.ach-card');
+  document.querySelectorAll('.ach-card.tap').forEach(function (x) { if (x !== c) x.classList.remove('tap'); });
+  if (c) c.classList.toggle('tap');
+});
+
 PAGES['/achievements'] = { title: 'Достижения — ' + SITE.name, render: function () { return Ach.pageHtml(); } };
 if (typeof DOC_PATHS !== 'undefined') DOC_PATHS.push('/achievements');
 Ach.init();
