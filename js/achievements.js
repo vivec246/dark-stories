@@ -9,19 +9,19 @@ var ACH = [
   { id: 'heart', name: 'От всего сердца', desc: 'Поделиться рассказом или цитатой', tier: 'bronze', img: 'img/ach/heart.webp' },
   { id: 'scout', name: 'Разведчик', desc: 'Заглянуть в подвал и разузнать о сайте и об авторе', tier: 'bronze', img: 'img/ach/scout.webp' },
   { id: 'shelf1', name: 'Первый том', desc: 'Добавить первый рассказ на полку', tier: 'bronze', img: 'img/ach/shelf1.webp' },
-  { id: 'shelf3', name: 'Начало коллекции', desc: 'Добавить три рассказа на полку', tier: 'bronze', img: 'img/ach/shelf3.webp' },
-  { id: 'another', name: 'Ну ещё один!', desc: 'Открыть второй рассказ за один день', tier: 'bronze', img: 'img/ach/another.webp' },
+  { id: 'another', name: 'Ещё один!', desc: 'Открыть второй рассказ за один день', tier: 'bronze', img: 'img/ach/another.webp' },
   { id: 'dark1', name: 'Тушите свет!', desc: 'Первый раз включить тёмную тему', tier: 'bronze', img: 'img/ach/dark1.webp' },
   { id: 'day1', name: 'С первыми лучами', desc: 'Первый раз включить дневную тему', tier: 'bronze', img: 'img/ach/day1.webp' },
   { id: 'time15', name: 'На досуге', desc: 'Провести за чтением 15 минут', tier: 'bronze', img: 'img/ach/time15.webp' },
   { id: 'search', name: 'Исследователь', desc: 'Воспользоваться поиском рассказов', tier: 'bronze', img: 'img/ach/search.webp' },
   { id: 'paths', name: 'Следопыт', desc: 'Открыть пять разных разделов сайта: главная, книги, статьи, донат и связь', tier: 'bronze', img: 'img/ach/paths.webp' },
-  { id: 'paper1', name: 'Это.. газета?', desc: 'Прочитать первую статью', tier: 'bronze', img: 'img/ach/paper1.webp' },
+  { id: 'annot', name: 'Аннотация', desc: 'Перевернуть карточку книги или статьи, чтобы прочитать описание', tier: 'bronze', img: 'img/ach/annot.webp' },
+  { id: 'paper1', name: 'Это… газета?', desc: 'Прочитать первую статью', tier: 'bronze', img: 'img/ach/paper1.webp' },
   { id: 'eye', name: 'Любопытный', desc: 'Открыть пять разных рассказов или статей', tier: 'bronze', img: 'img/ach/eye.webp' },
   { id: 'back', name: 'С возвращением!', desc: 'Вернуться на сайт на следующий день', tier: 'bronze', img: 'img/ach/back.webp' },
   { id: 'done', name: 'Стойкий', desc: 'Дочитать рассказ до конца', tier: 'silver',
     ico: '<rect x="30" y="24" width="40" height="52" rx="3"/><path d="M38 24 V76"/><path d="M45 52 L53 60 L66 42"/>' },
-  { id: 'shelf', name: 'Мой книжный шкаф', desc: 'Положить 5 рассказов на полку', tier: 'silver',
+  { id: 'shelf', name: 'Мой книжный шкаф', desc: 'Положить три рассказа на полку', tier: 'silver',
     ico: '<g transform="translate(5 0)"><rect x="26" y="40" width="12" height="36" rx="1.5"/><rect x="40" y="30" width="12" height="46" rx="1.5"/><rect x="54" y="44" width="10" height="32" rx="1.5"/></g><path d="M20 78 H80"/><path d="M34 48 H40 M48 40 H54" opacity=".6"/>' },
   { id: 'owl', name: 'Сова', desc: 'Читать в ночной теме', tier: 'silver',
     ico: '<path d="M30 38 L35 24 L45 33 H55 L65 24 L70 38 V58 C70 70 61 76 50 76 C39 76 30 70 30 58 Z"/><circle cx="41" cy="46" r="7.5"/><circle cx="59" cy="46" r="7.5"/><circle cx="41" cy="46" r="2.6" fill="currentColor" stroke="none"/><circle cx="59" cy="46" r="2.6" fill="currentColor" stroke="none"/><path d="M47 53 L50 59 L53 53 Z" fill="currentColor" fill-opacity=".5"/><path d="M40 66 C43 69 47 69 50 66 C53 69 57 69 60 66" opacity=".6"/><path d="M26 80 H74"/>' },
@@ -164,7 +164,7 @@ var Ach = (function () {
     }
     /* закладка и полка */
     var addBm = Store.addBookmark; Store.addBookmark = function () { var r = addBm.apply(this, arguments); unlock('mark'); return r; };
-    var tf = Store.toggleFav; Store.toggleFav = function () { var r = tf.apply(this, arguments); var fc = favCount(); if (fc >= 1) unlock('shelf1'); if (fc >= 3) unlock('shelf3'); if (fc >= 5) unlock('shelf'); checkShelf(); return r; };
+    var tf = Store.toggleFav; Store.toggleFav = function () { var r = tf.apply(this, arguments); var fc = favCount(); if (fc >= 1) unlock('shelf1'); if (fc >= 3) unlock('shelf'); checkShelf(); return r; };
     /* поделился: системное «Поделиться» или копирование ссылки/цитаты */
     if (navigator.share) { var ns = navigator.share.bind(navigator); navigator.share = function () { noteShare(R && R.work ? R.work.slug : ''); return ns.apply(null, arguments); }; }
     var ct = copyText;
@@ -253,8 +253,7 @@ var Ach = (function () {
       if (a.id === 'club' && !got) extra = '<div class="ap">' + Math.min(st.shared.length, 3) + ' из 3</div>';
       if (a.id === 'articler' && !got) extra = '<div class="ap">' + Math.min(doneArticles().length, 3) + ' из 3</div>';
       if (a.id === 'scout' && !got) extra = '<div class="ap">' + Math.min(st.pages.length, 2) + ' из 2</div>';
-      if (a.id === 'shelf' && !got) extra = '<div class="ap">' + Math.min(favCount(), 5) + ' из 5</div>';
-      if (a.id === 'shelf3' && !got) extra = '<div class="ap">' + Math.min(favCount(), 3) + ' из 3</div>';
+      if (a.id === 'shelf' && !got) extra = '<div class="ap">' + Math.min(favCount(), 3) + ' из 3</div>';
       if (a.id === 'paths' && !got) extra = '<div class="ap">' + Math.min(st.sections.length, 5) + ' из 5</div>';
       if (a.id === 'eye' && !got) extra = '<div class="ap">' + Math.min(st.opened.length, 5) + ' из 5</div>';
       if (a.id === 'time15' && !got) extra = '<div class="ap">' + Math.min(Math.floor(st.total / 60), 15) + ' из 15 мин</div>';
@@ -271,6 +270,9 @@ var Ach = (function () {
   }
   return { init: init, unlock: unlock, markDone: markDone, pageHtml: pageHtml };
 })();
+
+/* «Аннотация»: перевернуть карточку, чтобы прочитать описание */
+document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('[data-desc]')) Ach.unlock('annot'); });
 
 /* касание на телефоне: подсветить и увеличить нажатую медаль */
 document.addEventListener('click', function (e) {
