@@ -135,7 +135,7 @@ document.addEventListener('keydown', function (e) {
     return;
   }
   if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && (e.target.classList.contains('card') || e.target.classList.contains('book') || e.target.classList.contains('bcard') || e.target.classList.contains('paper')) && e.target.getAttribute('data-href')) {
-    e.preventDefault(); location.hash = e.target.getAttribute('data-href');
+    e.preventDefault(); if (e.target.getAttribute('data-href')) location.hash = e.target.getAttribute('data-href');
   }
   /* горячие клавиши читалки: ← → листать, + − размер, T тема, F скрыть кнопки */
   if (R && !e.ctrlKey && !e.metaKey && !e.altKey && !/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName || '') &&
@@ -188,7 +188,8 @@ function runSearch(value) {
   var hits = searchWorks(q);
   box.hidden = false;
   box.innerHTML = '<p class="head">' + (hits.length ? 'Найдено: ' + hits.length : 'Ничего не найдено') + '</p>' + hits.map(function (h) {
-    return '<a href="#/read/' + h.w.slug + '?q=' + encodeURIComponent(q) + '"><p class="t">' + esc(h.w.title) + ' <small>' + (h.w.kind === 'story' ? 'Рассказ' : 'Статья') + '</small></p><p class="s">' + hl(h.snippet, q) + '</p></a>';
+    var soonH = isSoon(h.w);
+    return '<a href="' + (soonH ? (h.w.kind === 'article' ? '#/articles' : '#/books') : '#/read/' + h.w.slug + '?q=' + encodeURIComponent(q)) + '"><p class="t">' + esc(h.w.title) + ' <small>' + (soonH ? 'Скоро' : h.w.kind === 'story' ? 'Рассказ' : 'Статья') + '</small></p><p class="s">' + hl(h.snippet, q) + '</p></a>';
   }).join('');
 }
 

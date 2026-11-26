@@ -13,6 +13,7 @@ var bodies = {}, bodiesLoading = null;
 function loadAllBodies() {
   if (bodiesLoading) return bodiesLoading;
   bodiesLoading = Promise.all(WORKS.map(function (w) {
+    if (isSoon(w)) return Promise.resolve();
     return fetchText(w.path).then(function (t) { bodies[w.slug] = stripMd(t); }).catch(function () {});
   }));
   return bodiesLoading;

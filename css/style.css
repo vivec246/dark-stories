@@ -830,21 +830,28 @@ html.kbd .sp-keys{display:block}   /* подсказка по клавишам �
 
 /* =====================================================================
    СТИЛЬ ЧИТАЛКИ «ФЭНТЕЗИ» — пергамент, золотые рамки, иллюстрация вверху страницы.
-   Иллюстрация берётся из поля «Иллюстрация» текста (w.art); если его нет — art/fantasy.jpg.
-   В тёмных темах та же картинка перекрашивается фильтром (--fa-filter).
+   Иллюстрация берётся из поля «Иллюстрация» текста (w.art); если его нет — своя картинка для каждой темы (art/fantasy-header-*.jpg).
    ===================================================================== */
 #reader.fantasy{--fa-head:'Cormorant Garamond',Georgia,'Times New Roman',serif;background:var(--fa-bg);background-attachment:fixed}
-:is(#reader,#overlay-root,#readerContextMenu,#selbar).fantasy.day{--fa-bg:radial-gradient(ellipse 80% 60% at 50% 25%,#3b2b1b 0%,#20160d 60%,#0f0a06 100%);--fa-panel:#ecd7a8;--fa-ink:#3a2814;--fa-title:#2a1a0b;--fa-acc:#7a2b16;--fa-gold:#97702c;--fa-line:rgba(122,84,30,.55);--fa-dim:#6b5233;--fa-on-bg:#7a2b16;--fa-on-fg:#f6e8c4;--fa-filter:none;--fa-art-op:1;--fa-shadow:0 20px 60px rgba(0,0,0,.6)}
-:is(#reader,#overlay-root,#readerContextMenu,#selbar).fantasy.night{--fa-bg:linear-gradient(rgba(3,6,12,.25),rgba(3,6,12,.5)),url('../art/fantasy-night.jpg') center/cover no-repeat,#03060c;--fa-panel:#0b1424;--fa-ink:#cdd8ee;--fa-title:#e9effc;--fa-acc:#b9caf2;--fa-gold:#8fa6d8;--fa-line:rgba(143,166,216,.4);--fa-dim:#8da1c9;--fa-on-bg:#b9caf2;--fa-on-fg:#0b1424;--fa-filter:invert(1) sepia(.55) hue-rotate(190deg) saturate(1.7) brightness(.78);--fa-art-op:.85;--fa-shadow:0 20px 60px rgba(0,0,0,.6)}
-:is(#reader,#overlay-root,#readerContextMenu,#selbar).fantasy.night.candle{--fa-bg:linear-gradient(rgba(4,10,6,.25),rgba(4,10,6,.5)),url('../art/fantasy-candle.jpg') center/cover no-repeat,#040a06;--fa-panel:#0b1a11;--fa-ink:#e0d8b8;--fa-title:#f2e2a8;--fa-acc:#e3c470;--fa-gold:#c9a24f;--fa-line:rgba(201,162,79,.42);--fa-dim:#a99d76;--fa-on-bg:#e3c470;--fa-on-fg:#0b1a11;--fa-filter:invert(1) sepia(.85) hue-rotate(35deg) saturate(1.5) brightness(.72)}
+:is(#reader,#overlay-root,#readerContextMenu,#selbar).fantasy.day{--fa-bg:linear-gradient(rgba(48,32,14,.30),rgba(48,32,14,.42)),url('../art/fantasy-bg-day.jpg') center/cover no-repeat,#cdbb94;--fa-panel:#ecd7a8;--fa-ink:#3a2814;--fa-title:#2a1a0b;--fa-acc:#7a2b16;--fa-gold:#97702c;--fa-line:rgba(122,84,30,.55);--fa-dim:#6b5233;--fa-on-bg:#7a2b16;--fa-on-fg:#f6e8c4;--fa-art-img:url('../art/fantasy-header-day.jpg');--fa-filter:none;--fa-filter-art:none;--fa-art-op:1;--fa-shadow:0 20px 60px rgba(0,0,0,.6)}
+:is(#reader,#overlay-root,#readerContextMenu,#selbar).fantasy.night{--fa-bg:linear-gradient(rgba(3,6,12,.25),rgba(3,6,12,.5)),url('../art/fantasy-bg-night.jpg') center/cover no-repeat,#03060c;--fa-panel:#0b1424;--fa-ink:#cdd8ee;--fa-title:#e9effc;--fa-acc:#b9caf2;--fa-gold:#8fa6d8;--fa-line:rgba(143,166,216,.4);--fa-dim:#8da1c9;--fa-on-bg:#b9caf2;--fa-on-fg:#0b1424;--fa-art-img:url('../art/fantasy-header-night.jpg');--fa-filter:none;--fa-filter-art:invert(1) sepia(.55) hue-rotate(190deg) saturate(1.7) brightness(.78);--fa-art-op:1;--fa-shadow:0 20px 60px rgba(0,0,0,.6)}
+:is(#reader,#overlay-root,#readerContextMenu,#selbar).fantasy.night.candle{--fa-bg:linear-gradient(rgba(4,10,6,.25),rgba(4,10,6,.5)),url('../art/fantasy-bg-candle.jpg') center/cover no-repeat,#040a06;--fa-panel:#0b1a11;--fa-ink:#e0d8b8;--fa-title:#f2e2a8;--fa-acc:#e3c470;--fa-gold:#c9a24f;--fa-line:rgba(201,162,79,.42);--fa-dim:#a99d76;--fa-on-bg:#e3c470;--fa-on-fg:#0b1a11;--fa-art-img:url('../art/fantasy-header-candle.jpg');--fa-filter:none;--fa-filter-art:invert(1) sepia(.85) hue-rotate(35deg) saturate(1.5) brightness(.72)}
+/* «Без фона» (переключатель в окне темы, только для стиля «Фэнтези»): вместо картинки — спокойный тёмный фон в цвет темы */
+#reader.fantasy.nobg.day{--fa-bg:radial-gradient(ellipse 80% 60% at 50% 25%,#3b2b1b 0%,#20160d 60%,#0f0a06 100%)}
+#reader.fantasy.nobg.night{--fa-bg:radial-gradient(ellipse 80% 60% at 50% 25%,#0b1424 0%,#060b16 60%,#03060c 100%)}
+#reader.fantasy.nobg.night.candle{--fa-bg:radial-gradient(ellipse 80% 60% at 50% 25%,#0b1a11 0%,#07110a 60%,#040a06 100%)}
+#reader:not(.fantasy) .sp-fabg{display:none}
 /* страница-свиток с двойной рамкой и точками в углах */
 #reader.fantasy .rcontent{position:relative;z-index:1;container-type:inline-size;border-radius:3px;background-color:var(--fa-panel);border:1px solid var(--fa-gold);box-shadow:var(--fa-shadow);outline:1px solid var(--fa-line);outline-offset:-9px;overflow:hidden;padding-top:60px}
 #reader.fantasy.day .rcontent{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .3 0 0 0 0 .14 0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),linear-gradient(#f1dfb2,#e4cb94)}
-/* иллюстрация вверху: растворяется вниз и к краям */
+/* иллюстрация вверху: растворяется вниз и к краям. Для каждой темы своя картинка (art/fantasy-header-day|night|candle.jpg);
+   если у текста задана своя иллюстрация (w.art), она одна на все темы и в тёмных перекрашивается фильтром --fa-filter-art */
 #reader.fantasy .rcontent::before{content:"";position:absolute;left:0;right:0;top:0;aspect-ratio:3/1;pointer-events:none;z-index:0;
-  background:var(--art,url('../art/fantasy.jpg')) right top/100% 100% no-repeat;filter:var(--fa-filter);opacity:var(--fa-art-op);
+  background:var(--art,var(--fa-art-img)) right top/100% 100% no-repeat;filter:var(--fa-filter);opacity:var(--fa-art-op);
   -webkit-mask-image:linear-gradient(0deg,transparent 0,#000 38%),linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%);-webkit-mask-composite:source-in;
   mask-image:linear-gradient(0deg,transparent 0,#000 38%),linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%);mask-composite:intersect}
+#reader.fantasy[style*="--art"] .rcontent::before{filter:var(--fa-filter-art)}
+#reader.fantasy.day .rcontent::before{mix-blend-mode:multiply}
 #reader.fantasy .rcontent::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;
   background:radial-gradient(circle,var(--fa-gold) 0 2.5px,transparent 3.5px) 5px 5px/14px 14px no-repeat,radial-gradient(circle,var(--fa-gold) 0 2.5px,transparent 3.5px) right 5px top 5px/14px 14px no-repeat,
     radial-gradient(circle,var(--fa-gold) 0 2.5px,transparent 3.5px) left 5px bottom 5px/14px 14px no-repeat,radial-gradient(circle,var(--fa-gold) 0 2.5px,transparent 3.5px) right 5px bottom 5px/14px 14px no-repeat}
@@ -1124,7 +1131,7 @@ html:has(#reader.gazette)::-webkit-scrollbar-button{display:none;width:0;height:
 .ach-dot{width:10px;height:10px;border-radius:50%;background:var(--tc);box-shadow:0 0 10px var(--tc)}
 .ach-th::after{content:"";order:1;flex:1;height:1px;background:linear-gradient(90deg,var(--tc),transparent);opacity:.4}
 .ach-th em{order:2;margin-left:0}
-.ach-tier.bronze{--tc:#e0a070}.ach-tier.silver{--tc:#d5dce8}.ach-tier.gold{--tc:#e3c470}
+.ach-tier.bronze{--tc:#e0a070}.ach-tier.silver{--tc:#d5dce8}.ach-tier.gold{--tc:#e3c470}.ach-tier.purple{--tc:#b98cf2}
 
 /* АНОНС: карточка без кнопки «Читать» */
 .bcard.soon,.paper.soon{cursor:default}
@@ -1227,7 +1234,7 @@ html:has(#reader.noir)::-webkit-scrollbar-button{display:none;width:0;height:0}
 @media (min-width:760px){.ach-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:1.6rem .5rem}.ach-card .ach-medal{width:min(120px,100%)}.ach-card .an{font-size:.9rem}.ach-card .ad{font-size:.76rem}}
 .ach-card .an,.ach-card .ad{overflow-wrap:anywhere}
 .ach-card{--tc:#e6eefc;cursor:default;-webkit-tap-highlight-color:transparent}
-.ach-tier.bronze .ach-card{--tc:#e0a070}.ach-tier.silver .ach-card{--tc:#d5dce8}.ach-tier.gold .ach-card{--tc:#e3c470}
+.ach-tier.bronze .ach-card{--tc:#e0a070}.ach-tier.silver .ach-card{--tc:#d5dce8}.ach-tier.gold .ach-card{--tc:#e3c470}.ach-tier.purple .ach-card{--tc:#b98cf2}
 .ach-card .ach-medal{transition:transform .25s ease,filter .25s ease;will-change:transform}
 @media (hover:hover){
   .ach-card:hover .ach-medal{transform:scale(1.1);filter:drop-shadow(0 0 16px var(--tc)) drop-shadow(0 6px 12px rgba(0,0,0,.5))}

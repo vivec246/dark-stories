@@ -24,65 +24,67 @@ function cardHtml(w) {
 
 /* КНИГА (раздел «Книги»): настоящий объёмный том с переплётом, наклоняется за курсором. */
 function bookCardHtml(w) {
-  var fav = Store.isFav(w.slug), href = '#/read/' + w.slug;
+  var fav = Store.isFav(w.slug), href = '#/read/' + w.slug, soon = isSoon(w);
   var pct = Math.min(100, Math.round(Store.pct(w.slug)));
   var label = fav ? 'Убрать с полки' : 'Добавить на полку';
+  var readBtn = soon ? '<span class="btn-read btn-soon">Скоро</span>' : '<a class="btn-read" href="' + href + '">' + (pct >= 1 && pct < 96 ? 'Продолжить' : 'Читать') + '</a>';
   var bg = "background-image:url('" + esc(w.cover) + "')";
-  return '<article class="bcard" data-href="' + href + '" tabindex="0" aria-label="Читать: ' + esc(w.title) + '">' +
+  return '<article class="bcard' + (soon ? ' soon' : '') + '"' + (soon ? '' : ' data-href="' + href + '" tabindex="0"') + ' aria-label="' + (soon ? 'Скоро: ' : 'Читать: ') + esc(w.title) + '">' +
     '<div class="bc-3d">' +
       '<div class="bc-face bc-front">' +
         '<img class="bk-cover" src="' + esc(w.cover) + '" alt="" loading="lazy" decoding="async" onerror="coverFail(this)">' +
         '<div class="bk-fallback" style="display:none"><span>' + esc(w.genre) + '</span></div>' +
         '<div class="bk-shade"></div><div class="bk-hinge"></div><div class="bc-gloss"></div>' +
-        '<div class="bk-top"><div class="bc-tl"><span class="bk-badge">' + esc(w.year) + '</span>' + (pct >= 1 ? '<span class="bk-badge bk-badge-pct">' + pct + '%</span>' : '') + '</div>' +
-          '<button type="button" class="card-favorite-badge' + (fav ? ' active' : '') + '" data-fav="' + w.slug + '" aria-pressed="' + fav + '" aria-label="' + label + '" title="' + label + '">' + icon('star') + '</button></div>' +
+        '<div class="bk-top"><div class="bc-tl"><span class="bk-badge">' + esc(w.year) + '</span>' + (soon ? '<span class="bk-badge bk-soon">Анонс</span>' : '') + (pct >= 1 ? '<span class="bk-badge bk-badge-pct">' + pct + '%</span>' : '') + '</div>' +
+          (soon ? '' : '<button type="button" class="card-favorite-badge' + (fav ? ' active' : '') + '" data-fav="' + w.slug + '" aria-pressed="' + fav + '" aria-label="' + label + '" title="' + label + '">' + icon('star') + '</button>') + '</div>' +
         '<div class="bk-info"><div class="bk-genre">' + esc(w.genre) + '</div><h3>' + esc(w.shortTitle) + '</h3>' +
           (pct >= 1 ? '<div class="bk-line"><i style="width:' + pct + '%"></i></div>' : '') +
           '<div class="bk-foot"><span class="age-rating">' + esc(w.age) + '</span>' +
           '<div class="card-footer-actions"><button type="button" class="btn-desc" data-desc>Описание</button>' +
-          '<a class="btn-read" href="' + href + '">' + (pct >= 1 && pct < 96 ? 'Продолжить' : 'Читать') + '</a></div></div></div>' +
+          readBtn + '</div></div></div>' +
       '</div>' +
       '<div class="bc-face bc-spine"><div class="bc-spine-bg" style="' + bg + '"></div><div class="bc-title-wrap"><div class="bc-title">' + esc(w.shortTitle) + '</div></div>' + emblemHtml('bc-emblem') + '</div>' +
       '<div class="bc-face bc-right"></div><div class="bc-face bc-top-f"></div><div class="bc-face bc-bottom-f"></div><div class="bc-face bc-back">' +
         '<div class="bc-back-bg" style="' + bg + '"></div>' +
         '<div class="bc-back-in"><div class="bk-genre">' + esc(w.genre) + '</div><h3>' + esc(w.title) + '</h3><div class="bc-rule"></div>' +
           '<div class="bc-desc-full">' + esc(w.description) + '</div>' +
-          '<div class="bc-meta">' + [esc(w.year), esc(w.age), w.minutes ? '~' + esc(w.minutes) + ' мин' : '', w.status === 'wip' ? 'пишется' : ''].filter(Boolean).join(' · ') + '</div>' +
+          '<div class="bc-meta">' + [esc(w.year), esc(w.age), (w.minutes && !soon) ? '~' + esc(w.minutes) + ' мин' : '', w.status === 'wip' ? 'пишется' : '', soon ? 'анонс' : ''].filter(Boolean).join(' · ') + '</div>' +
           '<div class="bk-foot"><button type="button" class="btn-desc" data-desc>К обложке</button>' +
-          '<a class="btn-read" href="' + href + '">' + (pct >= 1 && pct < 96 ? 'Продолжить' : 'Читать') + '</a></div></div>' +
+          readBtn + '</div></div>' +
         '<div class="bc-back-hinge"></div></div>' +
     '</div></article>';
 }
 
 /* ГАЗЕТА (раздел «Статьи»): вырезка с шапкой, заголовком, чёрно-белым фото и колонками. */
 function paperHtml(w) {
-  var href = '#/read/' + w.slug;
+  var href = '#/read/' + w.slug, soon = isSoon(w);
   var pct = Math.min(100, Math.round(Store.pct(w.slug)));
+  var readLink = soon ? '<span class="pp-read pp-soon">Скоро</span>' : '<a class="pp-read" href="' + href + '">Читать →</a>';
   var text = String(w.description || '');
-  var shortInfo = pct >= 1 ? pct + '%' : (w.minutes ? esc(w.minutes) + ' мин' : '');
-  var backInfo = [esc(w.year), esc(w.age), w.minutes ? esc(w.minutes) + ' мин чтения' : '', pct >= 1 ? 'прочитано ' + pct + '%' : ''].filter(Boolean).join(' · ');
-  return '<article class="paper" data-href="' + href + '" tabindex="0" aria-label="Читать: ' + esc(w.title) + '">' +
+  var shortInfo = soon ? 'Скоро на сайте' : pct >= 1 ? pct + '%' : (w.minutes ? esc(w.minutes) + ' мин' : '');
+  var backInfo = [ymLabel(w), esc(w.age), (!soon && w.minutes) ? esc(w.minutes) + ' мин чтения' : '', pct >= 1 ? 'прочитано ' + pct + '%' : ''].filter(Boolean).join(' · ');
+  return '<article class="paper' + (soon ? ' soon' : '') + '"' + (soon ? '' : ' data-href="' + href + '" tabindex="0"') + ' aria-label="' + (soon ? 'Скоро: ' : 'Читать: ') + esc(w.title) + '">' +
     '<div class="pp-flip">' +
     /* лицевая сторона */
     '<div class="pp-sheet">' +
-      '<div class="pp-meta"><span>Выпуск ' + esc(w.year) + '</span><span class="pp-genre">' + esc(w.genre) + '</span></div>' +
+      '<div class="pp-meta"><span>' + (soon ? 'Скоро · ' : w.month ? '' : 'Выпуск ') + ymLabel(w) + '</span><span class="pp-genre">' + esc(w.genre) + '</span></div>' +
       '<h3 class="pp-mast">' + esc(w.title) + '</h3>' +
       '<div class="pp-rule"></div>' +
-      '<figure class="pp-photo"><img src="' + esc(w.cover) + '" alt="" loading="lazy" decoding="async" onerror="coverFail(this)"><div class="pp-fallback" style="display:none"></div><i class="pp-tint"></i><i class="pp-dots"></i></figure>' +
+      '<figure class="pp-photo"><img src="' + esc(w.cover) + '" alt=""' + coverStyle(w) + ' loading="lazy" decoding="async" onerror="coverFail(this)"><div class="pp-fallback" style="display:none"></div><i class="pp-tint"></i><i class="pp-dots"></i></figure>' +
       '<div class="pp-foot"><span class="pp-age">' + esc(w.age) + '</span>' +
         '<span class="pp-time">' + shortInfo + '</span>' +
         '<button type="button" class="pp-desc-btn" data-desc>Описание</button>' +
-        '<a class="pp-read" href="' + href + '">Читать →</a></div>' +
+        readLink + '</div>' +
     '</div>' +
     /* оборот: полное описание */
     '<div class="pp-sheet pp-back">' +
-      '<div class="pp-meta"><span>Выпуск ' + esc(w.year) + '</span><span class="pp-genre">' + esc(w.genre) + '</span></div>' +
+      '<div class="pp-meta"><span>' + (soon ? 'Скоро · ' : w.month ? '' : 'Выпуск ') + ymLabel(w) + '</span><span class="pp-genre">' + esc(w.genre) + '</span></div>' +
       '<h3 class="pp-mast">' + esc(w.title) + '</h3>' +
       '<div class="pp-rule"></div>' +
       '<div class="pp-desc-full">' + esc(text) + '</div>' +
       '<div class="pp-info">' + backInfo + '</div>' +
       '<div class="pp-foot"><button type="button" class="pp-desc-btn" data-desc>К лицевой</button>' +
-        '<a class="pp-read" href="' + href + '">Читать →</a></div>' +
+        readLink + '</div>' +
     '</div>' +
     '</div></article>';
 }
@@ -146,4 +148,33 @@ function initCardAnimation() {
     entries.forEach(function (en) { en.target.classList.toggle('card-visible', en.isIntersecting); });
   }, { threshold: 0.75 });
   $$('.card, .bcard, .paper').forEach(function (c) { cardObserver.observe(c); });
+}
+
+/* Название на карточке статьи: уменьшаем шрифт, пока оно не влезет в отведённое место (картинка при этом остаётся квадратной) */
+function fitMasts() {
+  $$('.pp-sheet:not(.pp-back) .pp-mast').forEach(function (el) {
+    el.style.fontSize = '';
+    if (!el.clientHeight) return;
+    var fs = parseFloat(getComputedStyle(el).fontSize) || 26;
+    while (el.scrollHeight > el.clientHeight + 1 && fs > 11) { fs -= 0.5; el.style.fontSize = fs + 'px'; }
+  });
+}
+(function () {
+  var t = 0, run = function () { clearTimeout(t); t = setTimeout(fitMasts, 60); };
+  window.addEventListener('resize', run);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(run);
+  new MutationObserver(function (m) { for (var i = 0; i < m.length; i++) if (m[i].addedNodes.length) { run(); return; } }).observe(document.documentElement, { childList: true, subtree: true });
+})();
+
+/* «Ноябрь 2025», если в админке указан месяц, иначе просто год */
+function ymLabel(w) {
+  var m = String(w.month || ''); m = m ? m.charAt(0).toUpperCase() + m.slice(1) + ' ' : '';
+  return esc(m + (w.year || ''));
+}
+
+/* кадр картинки статьи: положение (coverX/coverY, %) и увеличение (coverZ, %) */
+function coverStyle(w) {
+  var x = w.coverX == null ? 50 : Number(w.coverX) || 0, y = w.coverY == null ? 0 : Number(w.coverY) || 0, z = Number(w.coverZ) || 100;
+  if (w.coverX == null && w.coverY == null && z <= 100) return '';
+  return ' style="object-position:' + x + '% ' + y + '%' + (z > 100 ? ';transform-origin:' + x + '% ' + y + '%;transform:scale(' + (z / 100) + ')' : '') + '"';
 }

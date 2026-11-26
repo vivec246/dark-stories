@@ -6,8 +6,15 @@ var pendingQuoteShareText = '';
 
 function hideContextMenu() { var m = $('#readerContextMenu'); if (m) m.classList.remove('show'); }
 function contextMenuOpen() { var m = $('#readerContextMenu'); return !!(m && m.classList.contains('show')); }
+/* тема читалки для меню/панели, которые лежат вне #reader: копируем классы стиля и режима */
+function themeOverlay(el) {
+  var r = document.getElementById('reader'); if (!el) return;
+  ['scifi', 'fantasy', 'gazette', 'noir', 'day', 'night', 'candle'].forEach(function (c) { el.classList.toggle(c, !!(r && r.classList.contains(c))); });
+  if (r && r.classList.contains('noir')) el.classList.add('gazette');   /* меню и окна в нуаре одеваются как газетные, но с нуар-цветами */
+}
 function showContextMenu(x, y) {
   var m = $('#readerContextMenu'); if (!m) return;
+  themeOverlay(m);
   var has = capturedSelectionText.length > 0;
   $$('[data-action="copy"], [data-action="quote"], [data-action="card"]', m).forEach(function (i) { i.style.display = has ? 'flex' : 'none'; });
   m.classList.add('show');
@@ -241,7 +248,7 @@ function quoteCard() {
     var b = build();
     var sel = window.getSelection();
     var txt = sel ? String(sel).trim() : '';
-    if (R && txt && sel.rangeCount && inReader(sel) && !contextMenuOpen()) { capturedSelectionText = txt; b.hidden = false; }
+    if (R && txt && sel.rangeCount && inReader(sel) && !contextMenuOpen()) { capturedSelectionText = txt; themeOverlay(b); b.hidden = false; }
     else b.hidden = true;
   }
   document.addEventListener('selectionchange', function () { clearTimeout(timer); timer = setTimeout(update, 250); });

@@ -6,7 +6,7 @@ function docCloseBtn() {
 
 var PAGES = {};
 function shelfHtml() {
-  var items = Store.s.favorites.map(getWork).filter(function (w) { return w && w.kind === 'story'; });
+  var items = Store.s.favorites.map(getWork).filter(function (w) { return w && w.kind === 'story' && !isSoon(w); });
   var h = '<h2 class="h-label">Ваша полка</h2>';
   var cont = Store.s.recent.map(getWork).filter(function (w) {
     if (!w) return false; var p = Store.pct(w.slug); return p > 4 && p < 96;
@@ -26,9 +26,10 @@ function homeHtml() {
   var h = '<div class="stack"><section id="shelf">' + shelfHtml() + '</section>';
   var rec = recommend();
   if (rec) h += '<section><h2 class="h-label" style="margin-bottom:.5rem">Похоже на то, что вы читали</h2><p class="acc" style="margin-bottom:1.25rem;font-size:.875rem">' + rec.genres.map(esc).join(' · ') + '</p>' + gridHtml(rec.items) + '</section>';
-  var fresh = WORKS.filter(function (w) { return w.year === '2026' || w.status === 'wip'; }).sort(function (a, b) { return Number(b.year) - Number(a.year); });
+  /* новинки: если в админке (Новости → «Новинки на главной») список собран вручную — SITE.fresh, иначе автоматически */
+  var fresh = Array.isArray(SITE.fresh) ? SITE.fresh.map(getWork).filter(Boolean) : WORKS.filter(function (w) { return w.year === '2026' || w.status === 'wip' || w.status === 'soon'; }).sort(function (a, b) { return Number(b.year) - Number(a.year); });
   h += '<section><h2 class="h-label">Новинки</h2>' + gridHtml(fresh) + '<ul class="news">' + NEWS.map(function (n) {
-    return '<li><p class="eyebrow">' + esc(n.date) + '</p><h3>' + (n.slug ? '<a href="#/read/' + n.slug + '">' + esc(n.title) + '</a>' : esc(n.title)) + '</h3><p>' + esc(n.text) + '</p></li>';
+    return '<li><p class="eyebrow">' + esc(n.date) + '</p><h3>' + (n.slug && !isSoon(getWork(n.slug)) ? '<a href="#/read/' + n.slug + '">' + esc(n.title) + '</a>' : esc(n.title)) + '</h3><p>' + esc(n.text) + '</p></li>';
   }).join('') + '</ul></section></div>';
   return h;
 }
@@ -85,7 +86,7 @@ function recommend() {
   Object.keys(s.progress).forEach(function (x) { if (s.progress[x].percent >= 25) bump(x, 1); });
   var genres = Object.keys(weight).sort(function (a, b) { return weight[b] - weight[a]; }).slice(0, 2);
   if (!genres.length) return null;
-  var items = WORKS.filter(function (w) { return genres.indexOf(w.genre) >= 0 && !Store.isFav(w.slug) && Store.pct(w.slug) < 92; });
+  var items = WORKS.filter(function (w) { return !isSoon(w) && genres.indexOf(w.genre) >= 0 && !Store.isFav(w.slug) && Store.pct(w.slug) < 92; });
   return items.length ? { genres: genres, items: items.slice(0, 4) } : null;
 }
 function notFoundHtml() {

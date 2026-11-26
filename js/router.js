@@ -82,7 +82,7 @@ function startHero() {
       showHeroSlide(idx);
       return;
     }
-  }, 5000);
+  }, heroCfg(SITE).seconds * 1000);
 }
 function setMeta(title, desc, image) {
   document.title = title;
@@ -135,6 +135,8 @@ function route() {
   var r = parseHash(), path = r.path;
   if (path === '/shelf') { location.replace('#/'); return; }
   if (path.indexOf('/read/') === 0) {
+    var sw = getWork(path.slice(6));
+    if (sw && isSoon(sw)) { toast('«' + sw.title + '» — скоро на сайте'); location.replace(hadShell && lastShellHash && lastShellHash.indexOf('#/read/') !== 0 ? lastShellHash : (sw.kind === 'article' ? '#/articles' : '#/books')); return; }
     if (!wasReader && hadShell) { savedScroll = window.scrollY; returnHash = lastShellHash; }
     jumpTo(0);
     if (openReader(path, r.params)) return;
@@ -164,7 +166,7 @@ function route() {
   var hadHero = !!$('.hero');
   $('#app').innerHTML = shell(path, page.render(), showHero);
   setMeta(page.title, page.desc);
-  if (showHero) { startHero(); heroFocusAll(); loadHeroRest(); }
+  if (showHero) { startHero(); heroFocusAll(); loadHeroRest(); HeroFx.mountSite(); }
   if (restoreScroll !== null) { jumpTo(restoreScroll); restoreScroll = null; }
   else if (wasReader && savedScroll !== null) jumpTo(savedScroll);
   else if (hadShell && !wasReader && showHero && !hadHero) { var nv = $('#nav'); jumpTo(nv ? nv.offsetTop : 0); }

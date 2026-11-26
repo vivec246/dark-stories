@@ -1,0 +1,64 @@
+/* ЭФФЕКТЫ НАДПИСИ «Dark Stories» в шапке. Включаются js/hero-fx.js, настраиваются в админке («Шапка»).
+   Переменные на заголовке: --fx-a (цвет), --fx-b (светлый), --fx-rgb, --fx-dur (скорость), --fx-gdur (скорость глитча), --fx-int (сила 0.1–1), --fx-glow. */
+
+.fx-title{position:relative;
+  background:linear-gradient(135deg,var(--fx-b) 20%,var(--fx-a) 55%,var(--fx-b) 100%);background-size:200% auto;
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  text-shadow:0 2px 30px rgba(0,0,0,.55),0 0 34px rgba(var(--fx-rgb),var(--fx-glow));
+  animation:titleZoom 1s forwards,colorFlow var(--fx-dur) ease-in-out infinite}
+
+@keyframes titleZoom{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes colorFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+/* Туман — плавное переливание и мягкое свечение (как было раньше) */
+.fx-title.fx-mist{}
+
+/* Без эффекта — спокойная надпись */
+.fx-title.fx-none{animation:titleZoom 1s forwards;background-size:100% auto;text-shadow:0 2px 30px rgba(0,0,0,.55),0 0 22px rgba(var(--fx-rgb),calc(var(--fx-glow) * .55))}
+
+/* Северное сияние — переливающиеся зелёно-голубо-фиолетовые полосы */
+.fx-title.fx-aurora{background:linear-gradient(100deg,#8cf7d3 0%,#6fb8ff 22%,#b58cff 44%,#ff9ad5 62%,#8cf7d3 80%,#6fb8ff 100%);background-size:300% auto;
+  -webkit-background-clip:text;background-clip:text;
+  text-shadow:0 2px 30px rgba(0,0,0,.5),0 0 calc(18px + var(--fx-int) * 34px) rgba(120,220,255,calc(.2 + var(--fx-int) * .45));
+  animation:titleZoom 1s forwards,fxAurora var(--fx-dur) linear infinite}
+@keyframes fxAurora{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+
+/* Угли и искры — тёплая надпись, пульсирующее свечение; искры рисует canvas */
+.fx-title.fx-embers{background:linear-gradient(180deg,#fff5dc 0%,#ffd28a 38%,var(--fx-a) 72%,#ff6a3d 100%);background-size:100% 200%;
+  -webkit-background-clip:text;background-clip:text;
+  text-shadow:0 2px 30px rgba(0,0,0,.6),0 0 calc(14px + var(--fx-int) * 30px) rgba(255,130,50,calc(.25 + var(--fx-int) * .4));
+  animation:titleZoom 1s forwards,fxEmber calc(var(--fx-dur) / 6) ease-in-out infinite alternate}
+@keyframes fxEmber{0%{background-position:0% 0%;filter:brightness(.95)}100%{background-position:0% 100%;filter:brightness(1.12)}}
+
+/* Глитч — редкие сбои: цветные копии букв смещаются и режутся полосами */
+.fx-title.fx-glitch{background:none;-webkit-text-fill-color:currentColor;color:#fff;text-shadow:0 2px 26px rgba(0,0,0,.6),0 0 22px rgba(var(--fx-rgb),calc(var(--fx-glow) * .6));animation:titleZoom 1s forwards}
+.fx-title.fx-glitch::before,.fx-title.fx-glitch::after{content:attr(data-text);white-space:pre-line;position:absolute;inset:0;pointer-events:none;
+  background:none;-webkit-text-fill-color:currentColor;text-shadow:none;mix-blend-mode:screen}
+.fx-title.fx-glitch::before{color:#ff3b6e;animation:fxGl1 var(--fx-gdur) steps(1,end) infinite}
+.fx-title.fx-glitch::after{color:#34e6ff;animation:fxGl2 var(--fx-gdur) steps(1,end) infinite}
+@keyframes fxGl1{
+  0%,86%{transform:none;clip-path:inset(0 0 0 0);opacity:0}
+  87%{transform:translate(calc(var(--fx-int) * -14px),calc(var(--fx-int) * 2px));clip-path:inset(12% 0 62% 0);opacity:1}
+  90%{transform:translate(calc(var(--fx-int) * 10px),0);clip-path:inset(58% 0 12% 0);opacity:1}
+  93%{transform:translate(calc(var(--fx-int) * -8px),calc(var(--fx-int) * -3px));clip-path:inset(30% 0 40% 0);opacity:1}
+  96%{transform:translate(calc(var(--fx-int) * 6px),0);clip-path:inset(75% 0 4% 0);opacity:1}
+  98%,100%{transform:none;clip-path:inset(0 0 0 0);opacity:0}}
+@keyframes fxGl2{
+  0%,85%{transform:none;clip-path:inset(0 0 0 0);opacity:0}
+  86%{transform:translate(calc(var(--fx-int) * 12px),calc(var(--fx-int) * -2px));clip-path:inset(50% 0 20% 0);opacity:1}
+  89%{transform:translate(calc(var(--fx-int) * -10px),0);clip-path:inset(8% 0 70% 0);opacity:1}
+  92%{transform:translate(calc(var(--fx-int) * 9px),calc(var(--fx-int) * 3px));clip-path:inset(62% 0 8% 0);opacity:1}
+  95%{transform:translate(calc(var(--fx-int) * -6px),0);clip-path:inset(22% 0 50% 0);opacity:1}
+  97%,100%{transform:none;clip-path:inset(0 0 0 0);opacity:0}}
+
+/* Пиксельная волна — настоящий текст прячется, вместо него canvas с пикселями */
+.fx-title.fx-pixel{animation:titleZoom 1s forwards;background:none;-webkit-text-fill-color:transparent;text-shadow:none}
+.fx-title.fx-pixel:not(.fx-canvas-on){-webkit-text-fill-color:currentColor;color:#fff;text-shadow:0 2px 26px rgba(0,0,0,.55)}
+.fx-title.fx-pixel.fx-canvas-on{-webkit-text-fill-color:transparent}
+.fx-canvas{position:absolute;pointer-events:none;z-index:1;max-width:none}
+.fx-canvas-pixel{filter:drop-shadow(0 0 10px rgba(var(--fx-rgb,136,170,221),.5))}
+
+@media (prefers-reduced-motion:reduce){
+  .fx-title,.fx-title.fx-aurora,.fx-title.fx-embers,.fx-title.fx-glitch{animation:none;opacity:1;transform:none}
+  .fx-title.fx-glitch::before,.fx-title.fx-glitch::after{display:none}
+}

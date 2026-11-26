@@ -12,18 +12,19 @@ var TRASH = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><polyline p
 var THEMES = ['night', 'day', 'candle'];
 var THEME_NAMES = { night: 'Ночь', day: 'День', candle: 'Тёплый' };
 /* стиль оформления читалки: «Стандартная» и «Sci-Fi» (терминал будущего). Какой стиль у текста — задаётся в админке (readerStyle, readerStyleChoice) */
-var STYLES = [['standard', 'Стандартная'], ['scifi', 'Sci-Fi'], ['fantasy', 'Фэнтези']];
+var STYLES = [['standard', 'Dark Stories'], ['scifi', 'Sci-Fi'], ['fantasy', 'Фэнтези'], ['noir', 'Нуар']];
+function isCustomStyle(v) { return v === 'scifi' || v === 'fantasy' || v === 'noir'; }
 function styleName(id) { for (var i = 0; i < STYLES.length; i++) if (STYLES[i][0] === id) return STYLES[i][1]; return id; }
 /* какие стили предложены читателю: «Стандартная» и стиль текста (если автор включил выбор) */
 function styleOptions(w) {
   if (w && w.kind === 'article') return ['gazette'];   /* статьи всегда в газетном стиле, выбора нет */
-  var def = w && (w.readerStyle === 'scifi' || w.readerStyle === 'fantasy') ? w.readerStyle : 'standard';
+  var def = w && isCustomStyle(w.readerStyle) ? w.readerStyle : 'standard';
   return def !== 'standard' && w.readerStyleChoice ? ['standard', def] : [def];
 }
 function workStyle(w) {
   if (!w) return 'standard';
   if (w.kind === 'article') return 'gazette';
-  var def = w.readerStyle === 'scifi' || w.readerStyle === 'fantasy' ? w.readerStyle : 'standard';
+  var def = isCustomStyle(w.readerStyle) ? w.readerStyle : 'standard';
   var opts = styleOptions(w);
   if (opts.length < 2) return def;
   var s = Store.s.styleBy[w.slug];
@@ -36,6 +37,7 @@ function ensureStyleFonts(style) {
   var l = document.createElement('link'); l.id = id; l.rel = 'stylesheet';
   l.href = style === 'scifi'
     ? 'https://fonts.googleapis.com/css2?family=Tektur:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap'
+    : style === 'noir' ? 'https://fonts.googleapis.com/css2?family=PT+Mono&display=swap'
     : 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Alegreya:wght@400;500&display=swap';
   document.head.appendChild(l);
 }
@@ -59,7 +61,7 @@ function textPanelHtml() {
 }
 function readerClass(w) {
   var t = Store.s.readerTheme;
-  return 'reader ' + (t === 'day' ? 'day' : 'night' + (t === 'candle' ? ' candle' : '')) + (workStyle(w) !== 'standard' ? ' ' + workStyle(w) : '');
+  return 'reader ' + (t === 'day' ? 'day' : 'night' + (t === 'candle' ? ' candle' : '')) + (workStyle(w) !== 'standard' ? ' ' + workStyle(w) : '') + (Store.s.fantasyBg === 'off' ? ' nobg' : '');
 }
 /* окно под кнопкой смены темы: Ночь / День / Тёплый, а ниже — стиль (если у текста их несколько) */
 function themePanelHtml(w) {
@@ -68,10 +70,23 @@ function themePanelHtml(w) {
   var opts = styleOptions(w);
   if (opts.length > 1) {
     h += '<div class="sp-sec"><div class="sp-t">Стиль</div><div class="sp-chips">' + opts.map(function (id) {
-      return '<button type="button" class="chip" data-style="' + id + '">' + styleName(id) + '</button>';
+      return '<button type="button" class="chip' + (id === workStyle(w) ? ' on' : '') + '" data-style="' + id + '">' + styleName(id) + '</button>';
     }).join('') + '</div></div>';
   }
+  /* переключатель фона читалки: только в стиле «Фэнтези» (в других стилях секция скрыта через CSS) */
+  if (opts.indexOf('fantasy') >= 0) {
+    h += '<div class="sp-sec sp-fabg"><div class="sp-t">Фон</div><div class="sp-chips">' +
+      chipsHtml('fantasyBg', [['on', 'С фоном'], ['off', 'Без фона']]) + '</div></div>';
+  }
   return h + '</div>';
+}
+
+/* номер дела для штампа «ДЕЛО № 07» (стиль «Нуар»): поле caseNo из админки, а если пусто — порядковый номер среди нуар-текстов на полке */
+function caseNo(w) {
+  if (!w || w.kind === 'article' || w.readerStyle !== 'noir') return '';
+  var n = String(w.caseNo || '').trim();
+  if (!n) { var i = 0; for (var k = 0; k < WORKS.length; k++) if (WORKS[k].kind !== 'article' && WORKS[k].readerStyle === 'noir') { i++; if (WORKS[k] === w) { n = String(i); break; } } }
+  return n.length < 2 ? '0' + n : n;
 }
 
 function readerShell(w) {
@@ -89,7 +104,7 @@ function readerShell(w) {
     textPanelHtml() + themePanelHtml(w) +
     '<div class="rtime" id="rtime" aria-live="off"></div>' +
     '<button type="button" class="btn control share" id="rshare" data-act="share" aria-label="Поделиться">' + icon('share') + '</button>' +
-    '<div class="rcontent" id="rcontent"><div id="rart"><div class="loadmsg">' + SPINNER + '<p>ЗАГРУЗКА</p></div></div></div></div>';
+    '<div class="rcontent" id="rcontent"' + (caseNo(w) ? ' data-case="' + caseNo(w) + '"' : '') + '><div id="rart"><div class="loadmsg">' + SPINNER + '<p>ЗАГРУЗКА</p></div></div></div></div>';
 }
 
 /* применяем настройки к открытой читалке и подсвечиваем выбранные кнопки */
@@ -103,6 +118,8 @@ function applyReaderPrefs() {
   rd.classList.toggle('scifi', st === 'scifi');
   rd.classList.toggle('fantasy', st === 'fantasy');
   rd.classList.toggle('gazette', st === 'gazette');
+  rd.classList.toggle('noir', st === 'noir');
+  rd.classList.toggle('nobg', S.fantasyBg === 'off');
   ensureStyleFonts(st);
   rd.setAttribute('data-font', S.readerFont);
   rd.setAttribute('data-width', S.readerWidth);
@@ -179,6 +196,7 @@ function countWords(blocks) {
 }
 
 function applyFont() {
+  var rdr = $('#reader'); if (rdr) rdr.style.setProperty('--nr-fsz', Store.s.fontSize);   /* нуар: размер строки задаёт сетку линий */
   $$('#rart .reader-body p').forEach(function (p) { p.style.fontSize = Store.s.fontSize + 'em'; });
 }
 function toggleControls() {
@@ -253,7 +271,18 @@ function updateProgressBar() {
   var rt = $('#rtime');
   if (rt && R && R.words) {
     var left = Math.round(R.words / 190 * (1 - frac));   /* ~190 слов в минуту */
-    rt.textContent = frac >= 0.985 ? 'дочитано' : left < 1 ? 'меньше минуты' : 'осталось ' + left + ' мин';
+    var done = frac >= 0.985;
+    if (workStyle(R.work) === 'noir') {
+      /* нуар: красная печать «ДО РАЗВЯЗКИ 12 МИН», а в конце — штамп «ДЕЛО РАСКРЫТО» */
+      var key = 'n' + (done ? 'd' : left < 1 ? 's' : left);
+      if (rt.getAttribute('data-k') !== key) {
+        rt.setAttribute('data-k', key); rt.classList.toggle('done', done);
+        rt.innerHTML = done ? 'ДЕЛО РАСКРЫТО' : left < 1 ? 'ФИНАЛ БЛИЗКО' : 'ДО РАЗВЯЗКИ <b>' + left + '</b> МИН';
+      }
+    } else {
+      if (rt.getAttribute('data-k')) { rt.removeAttribute('data-k'); rt.classList.remove('done'); }
+      rt.textContent = done ? 'дочитано' : left < 1 ? 'меньше минуты' : 'осталось ' + left + ' мин';
+    }
   }
   return pct;
 }
@@ -288,7 +317,7 @@ function openDialog(kind) {
   ov.innerHTML = modalHtml(body);
   /* окна содержания и закладок одеваются в стиль и тему читалки (scifi/fantasy/gazette + day/night/candle) */
   var rd = $('#reader');
-  ov.className = rd ? ['scifi', 'fantasy', 'gazette', 'day', 'night', 'candle'].filter(function (c) { return rd.classList.contains(c); }).join(' ') : '';
+  ov.className = rd ? ['scifi', 'fantasy', 'gazette', 'noir', 'day', 'night', 'candle'].filter(function (c) { return rd.classList.contains(c); }).concat(rd.classList.contains('noir') ? ['gazette'] : []).join(' ') : '';
 }
 function closeDialog() { $('#overlay-root').innerHTML = ''; $('#overlay-root').className = ''; if (R) R.dialog = null; }
 
@@ -314,3 +343,4 @@ function openReader(path, params) {
     });
   return true;
 }
+

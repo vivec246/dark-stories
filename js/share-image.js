@@ -62,7 +62,7 @@ function shareImageBlob(w, coverUrl, siteName) {
         /* нижняя строка: возраст и «кнопки» */
         var ry = bh - 52; ctx.textAlign = 'left'; ctx.fillStyle = '#e6eefc'; ctx.font = '700 17px ' + SANS; ctx.fillText(w.age || '', 58, ry + 24);
         function pill(x, wd, label, hi) { ctx.strokeStyle = hi ? '#88aadd' : 'rgba(255,255,255,.35)'; ctx.lineWidth = 1.5; rr(x, ry, wd, 34, 17); ctx.stroke(); ctx.fillStyle = hi ? '#a9c4f2' : '#d0d8ea'; ctx.font = '700 12px ' + SANS; ctx.textAlign = 'center'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '1.5px'; ctx.fillText(label, x + wd / 2, ry + 22); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '0px'; }
-        pill(110, 140, 'ОПИСАНИЕ', false); pill(262, 110, 'ЧИТАТЬ', true);
+        pill(110, 140, 'ОПИСАНИЕ', false); pill(262, 110, w.status === 'soon' ? 'СКОРО' : 'ЧИТАТЬ', true);
         ctx.restore();
         ctx.strokeStyle = 'rgba(255,255,255,.16)'; ctx.lineWidth = 2; ctx.strokeRect(1, 1, bw - 2, bh - 2);
         ctx.restore();
@@ -91,7 +91,9 @@ function shareImageBlob(w, coverUrl, siteName) {
         var footH = 42, phh = ph - pd - footH - y - 6;
         ctx.save(); ctx.beginPath(); ctx.rect(pd, y, pw - pd * 2, phh); ctx.clip();
         ctx.filter = 'grayscale(1) contrast(1.4) brightness(.97)';
-        if (img) { var rr = Math.max((pw - pd * 2) / img.width, phh / img.height), sw = (pw - pd * 2) / rr, sh2 = phh / rr; ctx.drawImage(img, (img.width - sw) / 2, 0, sw, sh2, pd, y, pw - pd * 2, phh); } else { ctx.fillStyle = '#b9b3a1'; ctx.fillRect(pd, y, pw - pd * 2, phh); }
+        if (img) { var rr = Math.max((pw - pd * 2) / img.width, phh / img.height), sw = (pw - pd * 2) / rr, sh2 = phh / rr; var ox = (w.coverX == null ? 50 : Number(w.coverX) || 0) / 100, oy = (w.coverY == null ? 0 : Number(w.coverY) || 0) / 100, zz = Math.max(1, (Number(w.coverZ) || 100) / 100);
+          var sx0 = (img.width - sw) * ox, sy0 = (img.height - sh2) * oy, sw2 = sw / zz, sh3 = sh2 / zz;
+          ctx.drawImage(img, sx0 + (sw - sw2) * ox, sy0 + (sh2 - sh3) * oy, sw2, sh3, pd, y, pw - pd * 2, phh); } else { ctx.fillStyle = '#b9b3a1'; ctx.fillRect(pd, y, pw - pd * 2, phh); }
         ctx.filter = 'none'; ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = '#faf6e6'; ctx.fillRect(pd, y, pw - pd * 2, phh); ctx.globalCompositeOperation = 'source-over';
         ctx.fillStyle = 'rgba(250,246,230,.6)';
         for (var gx = pd; gx < pw - pd; gx += 3) for (var gy = y; gy < y + phh; gy += 3) ctx.fillRect(gx, gy, 1.4, 1.4);
@@ -103,7 +105,7 @@ function shareImageBlob(w, coverUrl, siteName) {
         ctx.font = '700 13px ' + SANS; ctx.textAlign = 'left'; var aw = ctx.measureText(w.age || '').width + 12; ctx.strokeRect(0, -15, aw, 22); ctx.fillText(w.age || '', 6, 1); ctx.restore();
         ctx.fillStyle = '#5b5444'; ctx.font = '600 12px ' + SANS; ctx.textAlign = 'left'; ctx.fillText(w.minutes ? w.minutes + ' МИН' : '', pd + aw + 20, fy);
         ctx.fillStyle = '#14120f'; ctx.font = '700 13px ' + SANS; ctx.textAlign = 'right';
-        var rt = 'ЧИТАТЬ →', rw = ctx.measureText(rt).width; ctx.fillText(rt, pw - pd, fy);
+        var rt = w.status === 'soon' ? 'СКОРО' : 'ЧИТАТЬ →', rw = ctx.measureText(rt).width; ctx.fillText(rt, pw - pd, fy);
         ctx.fillStyle = '#8a1c1c'; ctx.fillRect(pw - pd - rw, fy + 6, rw, 2);
         ctx.restore();
         tx = 580; tw = 540;
@@ -129,7 +131,7 @@ function shareImageBlob(w, coverUrl, siteName) {
       }
       var meta = [w.age, w.year].filter(Boolean).join(' · ');
       if (meta) { ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.font = '500 26px ' + SERIF; ctx.fillText(meta, tx, cy); }
-      ctx.fillStyle = '#e3c470'; ctx.font = '600 30px ' + SERIF; ctx.fillText(String(siteName || '') + ' — читать', tx, H - 64);
+      ctx.fillStyle = '#e3c470'; ctx.font = '600 30px ' + SERIF; ctx.fillText(String(siteName || '') + (w.status === 'soon' ? ' — скоро' : ' — читать'), tx, H - 64);
 
       c.toBlob(function (b) { b ? resolve(b) : reject(new Error('toBlob')); }, 'image/jpeg', 0.88);
     }
